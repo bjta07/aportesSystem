@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 
 import userRouter from './routes/user.routes.js'
+import memberRouter from './routes/member.routes.js'
 
 dotenv.config()
 
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: true}))
 app.use(express.static('public'))
 
 app.use('/api/users', userRouter)
+app.use('/api/members', memberRouter)
 
 
 export default app
