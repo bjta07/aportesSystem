@@ -12,7 +12,12 @@ export const db = new Pool({
     connectionString
 })
 
-const connectPostgre = async () => {
+export const connectPostgre = async () => {
+    if (!connectionString) {
+        console.warn('DATABASE_URL not set. Skipping PostgreSQL connection.')
+        return
+    }
+
     try {
         await db.query('SELECT NOW()')
         console.log('✅ PostgreSQL connected')
@@ -20,8 +25,6 @@ const connectPostgre = async () => {
         console.error ('❌ error connecting to PostgreSQL', error)
     }
 }
-
-const connectDatabase = await connectPostgre()
 
 process.on('SIGINT', async () => {
     console.log('Closing database connections')

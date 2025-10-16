@@ -183,16 +183,21 @@ const deleteMember = async (req, res) => {
 
 const addEspecialidades = async (req, res) => {
     try {
-        const { id_afiliado, especialidades } = req.body
-        if (!id_afiliado || !Array.isArray(especialidades) || especialidades.length === 0) {
+        const { id_afiliado, id_especialidad, universidad, fecha_titulo} = req.body
+        if (!id_afiliado || !id_especialidad || !universidad || !fecha_titulo) {
             return res.status(400).json({
                 ok: false,
-                msg: 'Datos inválidos. Debe enviar id_afiliado y un array de especialidades.'
+                msg: 'Faltan campos requeridos.'
             })
         }
 
-        const result = await AfiliadoEspModel.insertEspecialidades(id_afiliado, especialidades)
-        return res.json({
+        const result = await MemberModel.addEspecialidad({
+            id_afiliado, 
+            id_especialidad, 
+            universidad, 
+            fecha_titulo
+        })
+        return res.status(200).json({
             ok: true,
             msg: 'Especialidades asignadas correctamente al afiliado',
             data: result
@@ -201,37 +206,61 @@ const addEspecialidades = async (req, res) => {
         console.error(error)
         return res.status(500).json({
             ok: false,
-            msg: 'Error al asignar especialidades'
+            msg: 'Error de servidor'
         })
     }
 }
 
-// ✅ Obtener especialidades por afiliado
 const getEspecialidadesByAfiliado = async (req, res) => {
     try {
-        const { id } = req.params
-        if (!id) {
-            return res.status(400).json({
-                ok: false,
-                msg: 'Debe proporcionar un ID de afiliado'
+        const { id_afiliado } = req.params
+        const especialidades = await MemberModel.findEspecialidadesByAfiliado(id_afiliado)
+
+        if (especialidades.length === 0) {
+            return res.status(404).json({
+                ok:false,
+                msg: 'No se encontraron especialidades para este afiliado'
             })
         }
-
-        const especialidades = await AfiliadoEspModel.findEspecialidadesByAfiliado(id)
         return res.json({
             ok: true,
-            msg: 'Especialidades obtenidas correctamente',
-            data: especialidades
+            data: especialidades,
+            msg: 'Especialidades obtenidas correctamente'
         })
     } catch (error) {
         console.error(error)
         return res.status(500).json({
             ok: false,
-            msg: 'Error de servidor al obtener especialidades'
+            msg: 'Error de Servidor'
         })
     }
 }
 
+const deleteEspecialidad = async (req, res) => {
+    try {
+        const { id_afiliado_especialidad } = req.params
+        const result = await MemberModel.deleteEspecialidadFromAfiliado(id_afiliado_especialidad)
+
+        if (!result) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Especialidad no encontrada o ya eliminada'
+            })
+        }
+
+        return res.json({
+            ok: true,
+            data: result,
+            msg: 'Especialidad eliminada correctamente'
+        })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error de servidor'
+        })
+    }
+}
 
 
 export const MemberController = {
@@ -242,6 +271,7 @@ export const MemberController = {
     updateMember,
     deleteMember,
     addEspecialidades,
-    getEspecialidadesByAfiliado
+    getEspecialidadesByAfiliado,
+    deleteEspecialidad
 }
 

@@ -85,7 +85,8 @@ const login = async (req, res) => {
             usuario: {
                 id_usuario: user.id_usuario,
                 nombre: user.nombre,
-                usuario: user.usuario
+                usuario: user.usuario,
+                rol: user.rol
             }
         })
     } catch (error) {
@@ -97,7 +98,7 @@ const login = async (req, res) => {
 //Perfil
 const profile = async (req, res) => {
     try {
-        const user = await UserModel.findOneByUsuario(req.usuario)
+        const user = await UserModel.findOneByUsuario(req.username)
         if (!user) return res.status(404).json({ ok: false, msg: 'User not found'})
         return res.json({
             ok: true,
@@ -139,25 +140,54 @@ const updateRol = async (req, res) => {
     }
 }
 
+const updateUser = async (req, res) => {
+    try {
+        const { id_usuario } = req.params
+        const { nombre, usuario, password, email, rol, id_colegio, apellidos } = req.body
+
+        const user = await UserModel.findOneById( id_usuario)
+        if (!user) return res.status(404).json({ok: false, msg: 'User not found'})
+        const updateUser = await UserModel.updateUsuario( id_usuario ,{ nombre, usuario, password, email, rol, id_colegio, apellidos})
+        return res.json({
+            ok: true,
+            data: updateUser,
+            msg: 'User updated successfully'
+        })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({ok: false, msg: 'Server error'})
+    }
+}
+
 //eliminar usuario
 const deleteUsuario = async (req, res) => {
     try {
         const { id_usuario } = req.params
+        console.log('[deleteUsuario] received id_usuario:', id_usuario)
 
         if (req.id_usuario === parseInt(id_usuario)) {
+            console.log('[deleteUsuario] attempt to delete self blocked for id:', req.id_usuario)
             return res.status(403).json({ ok: false, msg: 'You cannot delete yourself'})
         }
 
         const user = await UserModel.findOneById(id_usuario)
-        if (!user) return res.status(404).json({ ok: false, msg: 'User not found'})
+        console.log('[deleteUsuario] user found:', user)
+        if (!user) {
+            console.log('[deleteUsuario] user not found for id:', id_usuario)
+            return res.status(404).json({ ok: false, msg: 'User not found'})
+        }
         
         const deleteUser = await UserModel.deleteUsuario(id_usuario)
+        console.log('[deleteUsuario] deleteUser result:', deleteUser)
 
-        return res.json({
+        const responseBody = {
             ok: true,
             data: { id_usuario, nombre: deleteUser.nombre},
             msg: 'User deleted successfully'
-        })
+        }
+        console.log('[deleteUsuario] responding with:', responseBody)
+
+        return res.json(responseBody)
     } catch (error) {
         console.error(error)
         return res.status(500).json({ ok:false, msg: 'Server error'})
@@ -167,7 +197,7 @@ const deleteUsuario = async (req, res) => {
 const findAll = async (req, res) => {
     try {
         const users = await UserModel.findAll()
-        return res.json({ ok: false, data: users, msg: 'User retrieved successfully'})
+        return res.json({ ok: true, data: users, msg: 'User retrieved successfully'})
     } catch (error) {
         console.error(error)
         return res.status(500).json({ ok: false, msg: 'Server error'})
@@ -180,6 +210,7 @@ export const UserController = {
     profile,
     updateRol,
     deleteUsuario,
-    findAll
+    findAll,
+    updateUser
 }
 

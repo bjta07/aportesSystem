@@ -1,0 +1,95 @@
+.main {
+  padding: 20px;
+  margin: 0;
+  background: #f8fafc;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 32px;
+  text-align: center;
+  margin-bottom: 30px;
+  color: #15354e;
+}
+
+/* Tarjeta de usuario */
+.userCard {
+  background: linear-gradient(135deg, #15354e, #1f4d6d);
+  color: #fff;
+  border-radius: 16px;
+  padding: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  margin-bottom: 30px;
+}
+
+.userInfoLeft h2 {
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+.userInfoLeft p,
+.userInfoRight p {
+  margin: 6px 0;
+  font-weight: 500;
+}
+
+.label {
+  font-weight: 700;
+}
+
+.active {
+  color: #10b981; /* verde */
+  font-weight: 600;
+}
+
+.inactive {
+  color: #ef4444; /* rojo */
+  font-weight: 600;
+}
+
+/* Accesos rápidos */
+.quickAccess {
+  margin-top: 20px;
+}
+
+.quickAccess h3 {
+  font-size: 22px;
+  margin-bottom: 20px;
+  color: #15354e;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background-color: #3C4A59;
+}
+
+.card h4 {
+  font-size: 18px;
+  margin-bottom: 10px;
+    color: #E6E6E6;
+}
+
+.card p {
+    color: #E6E6E6;
+  font-size: 14px;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}

@@ -10,39 +10,57 @@ const createUser = async({
     usuario
 }) => {
     const query = {
-        text: `INSERT INTO usuarios (nombre, email, password, rol, id_colegio, apellidos, usuario) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        text: `INSERT INTO usuarios (nombre, email, password, rol, id_colegio, apellidos, usuario) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
         values: [nombre, email, password, rol, id_colegio, apellidos, usuario]
     }
-    const [ rows ] = await db.query(query)
-    return rows  [0]
+    const { rows } = await db.query(query)
+    return rows[0]
 }
 
 //obtener usuario
 const findOneByUsuario = async (usuario) => {
     const query = {
-        text: `SELECT id_usuario, nombre, usuario, email, password, rol FROM usuarios WHERE usuario = $1`,
+        text: `SELECT id_usuario, nombre, usuario, email, password, rol, id_colegio, apellidos FROM usuarios WHERE usuario = $1`,
         values: [usuario]
     }
     const { rows } = await db.query(query)
-    return rows [0]
+    return rows[0]
 }
 
 //obtener por id
 const findOneById = async (id_usuario) => {
     const query = {
-        text: `SELECT id_usuario, nombre, usuario, email, password, rol FROM usuarios WHERE id_usuario = $1`,
+        text: `SELECT id_usuario, nombre, usuario, email, password, rol, id_colegio, apellidos FROM usuarios WHERE id_usuario = $1`,
         values: [id_usuario]
     }
     const { rows } = await db.query(query)
-    return rows [0]
+    return rows[0]
 }
 
 //Obtener a todos los usuarios
+// Obtener a todos los usuarios, reemplazando id_colegio por nombre_colegio
 const findAll = async () => {
     const query = {
-        text: `SELECT id_usuario, nombre, usuario, email, password, rol FROM usuarios ORDER BY id_usuario DESC`
+        text: `
+            SELECT 
+                u.id_usuario, 
+                u.nombre, 
+                u.usuario, 
+                u.email, 
+                u.password, 
+                u.rol, 
+                u.apellidos,
+                c.nombre AS nombre_colegio
+            FROM 
+                usuarios u  
+            LEFT JOIN 
+                colegio c ON u.id_colegio = c.id_colegio 
+            ORDER BY 
+                u.id_usuario DESC
+        `
     }
     const { rows } = await db.query(query)
+    // El resultado 'rows' ahora incluirá la columna 'nombre_colegio'
     return rows
 }
 
@@ -119,5 +137,5 @@ export const UserModel = {
     updateUsuario,
     updateRol,
     deleteUsuario,
-    checkUsuario
+    checkUsuario,
 }

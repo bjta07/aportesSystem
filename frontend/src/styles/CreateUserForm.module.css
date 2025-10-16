@@ -1,0 +1,145 @@
+.container{
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.form{
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    width: 480px;
+    min-height: 560px;
+    margin-top: 45px;
+    padding: 30px 35px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+    align-items: center;
+}
+
+.form h2{
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: #02123d;
+}
+
+.div{
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.input{
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    height: 40px;
+    width: 100%;
+    padding: 0 10px;
+    font-size: 14px;
+    transition: all 0.2s ease-in-out;
+}
+
+.input:focus{
+    border-color: #076b03;
+    outline: none;
+    box-shadow: 0 0 5px rgba(7,107,3,0.4);
+}
+
+.button{
+    padding: 10px 25px;
+    border: none;
+    background: linear-gradient(135deg, #076b03, #0aa00a);
+    color: white;
+    font-weight: bold;
+    width: 180px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: center;
+}
+
+.button:hover{
+    background: linear-gradient(135deg, #064c02, #087d08);
+    transform: scale(1.05);
+}
+
+/* 🔹 Rol Toggle */
+.divRole{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.label{
+    font-weight: 600;
+    color: #333;
+}
+
+.switch{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.active{
+    color: #076b03;
+    font-weight: bold;
+}
+
+.toggle{
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.toggle input{
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider{
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 26px;
+}
+
+.slider:before{
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+}
+
+.toggle input:checked + .slider{
+    background-color: #076b03;
+}
+
+.toggle input:checked + .slider:before{
+    transform: translateX(24px);
+}
+

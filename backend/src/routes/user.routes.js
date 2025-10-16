@@ -1,10 +1,17 @@
 import { Router } from "express";
 import { UserController } from "../controllers/user.controller.js";
+import { verifyActiveAdmin, verifyActiveToken, verifyOwner } from "../middlewares/auth.middleware.js";
 
 const router = Router()
 
-router.post('/register', UserController.registrarUsuario)
-router.get('/login', UserController.login)
-router.get('/user', UserController.findAll)
+router.post('/login', UserController.login)
+router.post('/register',verifyActiveAdmin, UserController.registrarUsuario)
+router.get('/profile', verifyActiveToken, UserController.profile)
+
+router.get('/', verifyActiveAdmin, UserController.findAll)
+router.put('/:id_usuario', verifyActiveAdmin, UserController.updateUser)
+
+router.put('/:uid/rol', verifyActiveAdmin, UserController.updateRol)
+router.delete('/:id_usuario', verifyActiveAdmin, verifyOwner, UserController.deleteUsuario)
 
 export default router

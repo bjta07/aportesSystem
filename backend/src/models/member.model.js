@@ -151,45 +151,53 @@ const deleteMember = async (id_afiliado) => {
     return rows [0]
 }
 
-const insertEspecialidades = async (idAfiliado, especialidades) => {
-    // especialidades debe ser un array de IDs de especialidad
-    const values = especialidades.map(idEsp => `(${idAfiliado}, ${idEsp})`).join(',')
-
+const addEspecialidad = async ({ id_afiliado, id_especialidad, universidad, fecha_titulo }) => {
     const query = {
         text: `
-            INSERT INTO afiliado_especialidad (id_afiliado, id_especialidad)
-            VALUES ${values}
-            RETURNING *;
-        `
+            INSERT INTO afiliado_especialidad (id_afiliado, id_especialidad, universidad, fecha_titulo)
+            VALUES ($1, $2, $3, $4)
+            RETURNING id_afiliado, id_especialidad, universidad, fecha_titulo
+        `,
+        values: [id_afiliado, id_especialidad, universidad, fecha_titulo]
     }
 
     const { rows } = await db.query(query)
     return rows
 }
 
-// ✅ Consultar especialidades de un afiliado
-const findEspecialidadesByAfiliado = async (idAfiliado) => {
+const findEspecialidadesByAfiliado = async (id_afiliado) => {
     const query = {
         text: `
             SELECT 
                 a.id_afiliado,
                 a.nombres,
                 a.apellidos,
-                e.id_especialidad,
                 e.nombre AS especialidad,
-                e.universidad,
-                e.fecha_titulo
-            FROM afiliado a
-            JOIN afiliado_especialidad ae ON a.id_afiliado = ae.id_afiliado
-            JOIN especialidad e ON e.id_especialidad = ae.id_especialidad
+                ae.universidad,
+                ae.fecha_titulo
+            FROM afiliado AS a
+            INNER JOIN afiliado_especialidad AS ae ON a.id_afiliado = ae.id_afiliado
+            INNER JOIN especialidad AS e ON e.id_especialidad = ae.id_especialidad
             WHERE a.id_afiliado = $1
-            ORDER BY e.nombre ASC;
+            ORDER BY ae.fecha_titulo DESC
         `,
-        values: [idAfiliado]
+        values: [id_afiliado]
     }
+    const result = await db.query(query)
+    return result?.rows ?? []
+}
 
+const deleteEspecialidadFromAfiliado = async (id_afiliado_especialidad) => {
+    const query = {
+        text: `
+            DELETE FROM afiliado_especialidad
+            WHERE id_afiliado_especialidad = $1
+            RETURNING id_afiliado_especialidad
+        `,
+        values: [id_afiliado_especialidad]
+    }
     const { rows } = await db.query(query)
-    return rows
+    return rows[0]
 }
 
 export const MemberModel = {
@@ -200,7 +208,8 @@ export const MemberModel = {
     findByColegio,
     updateMemeber,
     deleteMember,
-    insertEspecialidades,
-    findEspecialidadesByAfiliado
+    addEspecialidad,
+    findEspecialidadesByAfiliado,
+    deleteEspecialidadFromAfiliado
 }
 
