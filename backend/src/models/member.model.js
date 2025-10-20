@@ -52,15 +52,21 @@ const findById = async(id_afiliado) => {
 const findAll = async() => {
     const query = {
         text: `SELECT
-            a.id_afiliado,
-            a.ci,
-            a.nombres,
-            a.apellidos,
-            a.id_colegio,
-            c.id_colegio AS nombre
+                a.id_afiliado,
+                a.matricula_profesional,
+                a.nro_registro_colegio,
+                a.email,
+                a.estado,
+                a.ci,
+                a.nombres,
+                a.apellidos,
+                a.id_colegio,
+                c.nombre AS nombre_colegio,
+                a.fecha_afiliacion,
+                TO_CHAR(a.fecha_afiliacion, 'DD/MM/YY') AS fecha_afiliacion_formateada
             FROM afiliado a
             JOIN colegio c ON a.id_colegio = c.id_colegio
-            ORDER BY apellidos DESC
+            ORDER BY a.apellidos DESC;
         `
     }
     const { rows } = await db.query(query)
@@ -174,7 +180,7 @@ const findEspecialidadesByAfiliado = async (id_afiliado) => {
                 a.apellidos,
                 e.nombre AS especialidad,
                 ae.universidad,
-                ae.fecha_titulo
+                TO_CHAR(ae.fecha_titulo, 'DD/MM/YYYY') AS new_fecha_titulo
             FROM afiliado AS a
             INNER JOIN afiliado_especialidad AS ae ON a.id_afiliado = ae.id_afiliado
             INNER JOIN especialidad AS e ON e.id_especialidad = ae.id_especialidad

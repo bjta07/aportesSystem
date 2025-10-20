@@ -140,54 +140,87 @@ export const verifyActiveUser = async (req, res, next) => {
     }
 }
 
-export const restrictToColegio = (req, res, next) => {
+export const restrictToColegio = async (req, res, next) => { // ✅ HACER ASYNC
     try {
-        const user = req.user
+        // Diagnostic info to help trace undefined properties
+        console.log('restrictToColegio entered', {
+            uid: req.uid,
+            hasReqUser: !!req.user,
+            roleFromReq: req.role,
+            bodyKeys: Object.keys(req.body || {}),
+            params: req.params,
+            query: req.query
+        })
+        // Try to use attached user; if not present, attempt to fetch from DB using uid
+        let user = req.user
+        if (!user && req.uid) {
+            try {
+                user = await UserModel.findOneById(req.uid)
+                // attach for downstream middlewares/controllers
+                if (user) req.user = user
+            } catch (err) {
+                console.error('Error fetching user in restrictToColegio:', err)
+                return res.status(500).json({ ok: false, msg: 'Server error al buscar usuario' })
+            }
+        }
+
         if (!user) {
             return res.status(401).json({ ok: false, msg: 'Authentication required' })
         }
 
-        const { rol, id_colegio } = user
+        // ✅ CORRECCIÓN 1: Desestructuración segura. Usar valores por defecto si no existen.
+        const rol = user.rol || req.role || 'user'
+        // If user is admin, bypass colegio restriction early (admins may not have id_colegio)
+        if (rol === 'admin') {
+            console.log('restrictToColegio: admin bypass')
+            return next()
+        }
 
-        // Detecta de dónde viene el id_colegio directamente
+        // ensure id_colegio is available: prefer numeric coercion, fallback to 0
+        const id_colegio = Number(user.id_colegio ?? 0)
+
+        // 1. Detectar id_colegio destino (sincrónico)
         let idColegioDestino = req.body.id_colegio || req.params.id_colegio || req.query.id_colegio
 
-        // Si no viene id_colegio, tal vez vienen ids de afiliado (afiliado_id, id_afiliado, id)
+        // 2. Buscar id_colegio a partir del afiliado_id (asíncrono)
         if (!idColegioDestino) {
-            const afiliadoId = req.body.afiliado_id || req.params.id_afiliado || req.params.id || req.body.id_afiliado || req.query.afiliado_id || req.query.id_afiliado
+            const afiliadoIdRaw = req.body?.afiliado_id || req.params?.id_afiliado || req.params?.id || req.body?.id_afiliado || req.query?.afiliado_id || req.query?.id_afiliado
+            const afiliadoId = afiliadoIdRaw != null ? Number(afiliadoIdRaw) : null
+
             if (afiliadoId) {
-                // Buscar afiliado y extraer su id_colegio
-                return MemberModel.findById(afiliadoId).then(afiliado => {
+                try {
+                    // ✅ CORRECCIÓN 2: Usar await en lugar de .then()
+                    const afiliado = await MemberModel.findById(afiliadoId)
+
                     if (!afiliado) {
+                        console.log('restrictToColegio: afiliado not found for id', afiliadoId)
                         return res.status(404).json({ ok: false, msg: 'Afiliado no encontrado' })
                     }
-                    idColegioDestino = afiliado.id_colegio
-
-                    // Admin puede todo
-                    if (rol === 'admin') return next()
-
-                    // Users responsible for a colegio can only access their own colegio
-                    if ((rol === 'responsable' || rol === 'user') && Number(id_colegio) === Number(idColegioDestino)) {
-                        return next()
-                    }
-
-                    return res.status(403).json({ ok: false, msg: 'No tiene permisos para registrar o ver datos de otros colegios' })
-                }).catch(err => {
+                    idColegioDestino = afiliado.id_colegio ?? afiliado.idColegio ?? null
+                } catch (err) {
                     console.error('Error fetching afiliado in restrictToColegio:', err)
-                    return res.status(500).json({ ok: false, msg: 'Server error' })
-                })
+                    return res.status(500).json({ ok: false, msg: 'Server error al buscar afiliado' })
+                }
             }
         }
 
+        // 3. Fallback si no se encontró el colegio
         if (!idColegioDestino) {
+            // Permitir que admins/supervisores sin colegio asignado avancen si no hay destino
+            if (rol === 'admin' || rol === 'responsable') {
+                 // Si es un GET que no requiere restricción (ej. obtener lista de colegios)
+                 return next()
+            }
             return res.status(400).json({ ok: false, msg: 'No se especificó el id del colegio destino' })
         }
+
+        // 4. Lógica de Restricción Final
 
         // Admin puede todo
         if (rol === 'admin') return next()
 
         // Users responsible for a colegio can only access their own colegio
-        if ((rol === 'responsable' || rol === 'user') && Number(id_colegio) === Number(idColegioDestino)) {
+        if ((rol === 'user') && Number(id_colegio) === Number(idColegioDestino)) {
             return next()
         }
 

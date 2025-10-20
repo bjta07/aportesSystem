@@ -32,8 +32,13 @@ const create = async ({
         ]
     };
 
+  try {
     const { rows } = await db.query(query);
     return rows[0];
+  } catch (err) {
+    console.error('AporteModel.create SQL error', { text: query.text, values: query.values, err: err.message })
+    throw err
+  }
 };
 
 //Editar aportes
@@ -92,18 +97,20 @@ const findAll = async ({ page = 1, limit = 10 }) => {
 
     const query = {
         text: `
-            SELECT 
-                a.ci,
-                a.nombres,
-                a.apellidos,
-                c.nombre,
-                ap.mes,
-                ap.monto,
-                ap.fecha_registro
+      SELECT 
+        ap.id,
+        ap.anio,
+        a.ci,
+        a.nombres,
+        a.apellidos,
+        c.nombre,
+        ap.mes,
+        ap.monto,
+        ap.fecha_registro
             FROM afiliado a
             JOIN colegio c ON a.id_colegio= c.id_colegio
             JOIN aportes ap ON ap.afiliado_id = a.id_afiliado
-            ORDER BY a.fecha_registro DESC
+          ORDER BY ap.fecha_registro DESC
             LIMIT $1 OFFSET $2
         `,
         values: [limit, offset]
@@ -128,19 +135,21 @@ const findByAfiliado = async ({ afiliado_id, page = 1, limit = 10 }) => {
   // 2️⃣ Obtener registros con JOIN + paginación
   const query = {
     text: `
-        SELECT 
-            a.ci,
-            a.nombres,
-            a.apellidos,
-            c.nombre,
-            ap.mes,
-            ap.monto,
-            ap.fecha_registro
+    SELECT
+      ap.id,
+      ap.anio,
+      a.ci,
+      a.nombres,
+      a.apellidos,
+      c.nombre,
+      ap.mes,
+      ap.monto,
+      ap.fecha_registro
         FROM afiliado a
         JOIN colegio c ON a.id_colegio= c.id_colegio
         JOIN aportes ap ON ap.afiliado_id = a.id_afiliado
-        WHERE a.id_afiliado = $1
-        ORDER BY ap.anio DESC, ap.mes DESC
+  WHERE a.id_afiliado = $1
+  ORDER BY ap.anio DESC, ap.mes DESC
         LIMIT $2 OFFSET $3
     `,
     values: [parseInt(afiliado_id), limit, offset],
@@ -169,18 +178,20 @@ const findByFechaRegistro = async ({ fecha_inicio, fecha_fin, page = 1, limit = 
     const query = {
         text: `
             SELECT 
-                a.ci,
-                a.nombres,
-                a.apellidos,
-                c.nombre,
-                ap.mes,
-                ap.monto,
-                ap.fecha_registro
+            ap.id,
+            ap.anio,
+            a.ci,
+            a.nombres,
+            a.apellidos,
+            c.nombre,
+            ap.mes,
+            ap.monto,
+            ap.fecha_registro
             FROM afiliado a
             JOIN colegio c ON a.id_colegio= c.id_colegio
             JOIN aportes ap ON ap.afiliado_id = a.id_afiliado
-            WHERE a.fecha_registro BETWEEN $1 AND $2
-            ORDER BY a.fecha_registro DESC
+        WHERE ap.fecha_registro BETWEEN $1 AND $2
+        ORDER BY ap.fecha_registro DESC
             LIMIT $3 OFFSET $4
         `,
         values: [fecha_inicio, fecha_fin, limit, offset]
@@ -218,7 +229,7 @@ const findByAnio = async ({ anio }) => {
         JOIN colegio c ON a.id_colegio= c.id_colegio
         JOIN aportes ap ON ap.afiliado_id = a.id_afiliado
         WHERE ap.anio = $1
-        ORDER BY a.mes DESC, a.fecha_registro DESC
+    ORDER BY ap.mes DESC, ap.fecha_registro DESC
     `,
     values: [parseInt(anio, 10)],
   };

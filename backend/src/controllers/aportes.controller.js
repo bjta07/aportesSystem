@@ -8,6 +8,8 @@ export const AportesController = {
   async create(req, res) {
     try {
             const { afiliado_id, anio, mes, monto, fecha_registro } = req.body
+            console.log('AportesController.create called by uid=', req.uid, 'role=', req.role)
+            console.log('AportesController.create body=', req.body)
       if (!afiliado_id || !anio || !mes || !monto) {
         return res.status(400).json({ ok: false, error: "Faltan datos obligatorios" })
       }
@@ -156,6 +158,31 @@ async getYearsAndAportes(req, res) {
   } catch (error) {
     console.error("Error en AportesController.getYearsAndAportes:", error);
     return res.status(500).json({ ok: false, error: "Error al obtener años y aportes" });
+  }
+},
+
+//Obtener todos los años disponibles:
+async getAllYears (req, res) {
+  try {
+    const years = await AporteModel.findAllYears()
+
+    if (!years || years.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        msg: 'No hay años registrados en aportes.'
+      })
+    }
+
+    return res.status(200).json({
+      ok: true,
+      years
+    })
+  } catch (error) {
+    console.error('Error al obtener los años de aportes:', error)
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error del servidor al obtener los años de aportes.'
+    })
   }
 },
 

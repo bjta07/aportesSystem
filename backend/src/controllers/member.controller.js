@@ -72,6 +72,7 @@ const findAll = async (req, res) => {
             data: members,
             msg: 'Lista de afiliados generada correctamente'
         })
+        
     } catch (error) {
         console.error(error)
         return res.status(500).json({
@@ -216,9 +217,11 @@ const getEspecialidadesByAfiliado = async (req, res) => {
         const { id_afiliado } = req.params
         const especialidades = await MemberModel.findEspecialidadesByAfiliado(id_afiliado)
 
-        if (especialidades.length === 0) {
-            return res.status(404).json({
-                ok:false,
+        // If none found, return ok with empty array (not an error)
+        if (!Array.isArray(especialidades) || especialidades.length === 0) {
+            return res.json({
+                ok: true,
+                data: [],
                 msg: 'No se encontraron especialidades para este afiliado'
             })
         }

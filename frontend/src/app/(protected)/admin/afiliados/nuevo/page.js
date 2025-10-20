@@ -23,11 +23,25 @@ export default function CreateMemberPage(){
     const [message, setMessage] = useState("")
 
     const handleChange = (e) => {
-        const {id, value } = e.target
-        setFormData(prev => ({
-            ...prev, [id]: value
-        }))
+    const { id, value, type } = e.target;
+    let newValue = value;
+
+    const fieldsToUppercase = ['nombres', 'apellidos', 'matricula_profesional', 'nro_registro_colegio'];
+
+    if (fieldsToUppercase.includes(id)) {
+        newValue = value.toUpperCase();
+    } 
+    
+    else if (id === 'email') {
+        
+        newValue = value.toLowerCase();
     }
+    
+    setFormData(prev => ({
+        ...prev, 
+        [id]: newValue
+    }));
+}
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -165,7 +179,6 @@ export default function CreateMemberPage(){
                     </div>
                     <div className={styles.mailContainer}>
                         <input
-                            required
                             className={styles.mail}
                             type="text"
                             id="estado"
@@ -183,21 +196,24 @@ export default function CreateMemberPage(){
                         >
                             <option value="">Seleccione...</option>
                             <optgroup label="Colegios Departamentales">
-                                <option value="1">Colegio departamental de Santa Cruz</option>
-                                <option value="2">Colegio departamental de La Paz</option>
-                                <option value="3">Colegio departamental de Cochabamba</option>
-                                <option value="4">Colegio departamental de Oruro</option>
-                                <option value="5">Colegio departamental de Potosí</option>
-                                <option value="6">Colegio departamental de Tarija</option>
-                                <option value="7">Colegio departamental de Sucre</option>
-                                <option value="8">Colegio departamental de Pando</option>
-                            </optgroup>
-                            <optgroup label="Colegios Regionales">
-                                <option value="9">Colegio regional de El Alto</option>
-                                <option value="10">Colegio regional de Tupiza</option>
-                                <option value="11">Colegio regional de Camiri</option>
-                                <option value="12">Colegio regional de Catavi</option>
-                            </optgroup>
+                                    <option value="1">Colegio departamental de La Paz</option>
+                                    <option value="2">Colegio departamental de Oruro</option>
+                                    <option value="3">Colegio departamental de Cochabamba</option>
+                                    <option value="4">Colegio departamental de Santa Cruz</option>
+                                    <option value="5">Colegio departamental de Tarija</option>
+                                    <option value="6">Colegio departamental de Potosi</option>
+                                    <option value="7">Colegio departamental de Beni</option>
+                                    <option value="8">Colegio departamental de Pando</option>
+                                    <option value="9">Colegio departamental de Chuquisaca</option>
+                                </optgroup>
+                                <optgroup label="Colegios Regionales">
+                                    <option value="10">Colegio regional de El Alto</option>
+                                    <option value="11">Colegio regional de Camiri</option>
+                                    <option value="12">Colegio regional de Tupiza</option>
+                                    <option value="13">Colegio regional de Catavi</option>
+                                    <option value="13">Colegio regional de Riberalta</option>
+                                    <option value="13">Colegio regional de Yacuiba</option>
+                                </optgroup>
                         </select>
                     </div>
                     <button className={styles.submitBtn} type="submit" disabled={loading}>

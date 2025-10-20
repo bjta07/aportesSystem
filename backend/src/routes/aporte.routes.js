@@ -12,6 +12,7 @@ router.post('/', verifyActiveUserOrAdmin, AportesController.create)
 router.get('/', verifyActiveAdmin, AportesController.getAll)
 router.get('/afiliado/:id', verifyActiveUserOrAdmin, AportesController.getByAfiliado)
 router.get('/anios-aportes', verifyActiveAdmin,  AportesController.getYearsAndAportes)
+router.get('/anios', verifyActiveUserOrAdmin, AportesController.getAllYears)
 
 
 router.put('/:id', verifyActiveAdmin,  AportesController.update)
