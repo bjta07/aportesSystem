@@ -217,7 +217,8 @@ const findByAnio = async ({ anio }) => {
   // 2️⃣ Obtener registros
   const query = {
     text: `
-        SELECT 
+        SELECT
+            a.id_afiliado, 
             a.ci,
             a.nombres,
             a.apellidos,

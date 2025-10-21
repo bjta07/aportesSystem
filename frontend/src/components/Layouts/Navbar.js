@@ -20,9 +20,10 @@ export default function Navbar({ collapsed }){
     ]
 
     const userLinks = [
-        { href: `/users`, label: 'Dashboard', icon: 'user'},
-        { href: `/users/afiliados`, label: 'Afiliados', icon: 'users'},
-        { href: `/users/aportes`, label: 'Aportes', icon: 'editCash'}
+        { href: `${basePath}`, label: 'Dashboard', icon: 'user'},
+        { href: `${basePath}/afiliados/nuevo`, label: 'Registrar Afiliado', icon: 'users'},
+        { href: `${basePath}/afiliados`, label: 'Afiliados', icon: 'users'},
+        { href: `${basePath}/aportes`, label: 'Aportes', icon: 'editCash'}
     ]
 
     const links = user.rol === 'admin' ? adminLinks : userLinks

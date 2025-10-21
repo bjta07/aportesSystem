@@ -139,11 +139,16 @@ async getByAnio(req, res) {
 async getYearsAndAportes(req, res) {
   try {
     const { anio } = req.query;
-
-    // siempre devolver años
     const years = await AporteModel.findAllYears();
 
-    let aportes = [];
+    let aportes = {
+      data: [],
+      total: 0,
+      page: 1,
+      limit: 0,
+      totalPages: 0
+    };
+
     if (anio) {
       aportes = await AporteModel.findByAnio({ anio });
     }
@@ -160,6 +165,7 @@ async getYearsAndAportes(req, res) {
     return res.status(500).json({ ok: false, error: "Error al obtener años y aportes" });
   }
 },
+
 
 //Obtener todos los años disponibles:
 async getAllYears (req, res) {

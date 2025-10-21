@@ -22,7 +22,7 @@ export default function UserDashboard(){
                         <span className={styles.label}>Rol:</span> {user?.rol == 'admin' ? 'Administrador': 'usuario'}
                     </p>
                     <p>
-                        <span className={styles.label}>Colegio:</span> {user.rol == 'admin' ? `Todos los Colegios`: `${user.id_colegio.nombre}`}
+                        <span className={styles.label}>Colegio:</span> {user.rol == 'admin' ? `Todos los Colegios`: `${user.nombre_colegio}`}
                     </p>
                 </div>
             </div>

@@ -22,16 +22,21 @@ export const AuthProvider = ({ children }) => {
 
         const profileResp = await authApi.getProfile()
         // authApi.getProfile may return either { data: { ... } } or the user object directly
-        const profile = profileResp && profileResp.data ? profileResp.data : profileResp
+        const profile = profileResp?.data || profileResp
 
         if (profile) {
-          setUser(profile)
+          const normalizedProfile = {
+          ...profile,
+          id_colegio: profile?.id_colegio ?? null,
+          rol: profile?.rol || profile?.role || 'user'
+        }
+        setUser(normalizedProfile)
         } else {
           localStorage.removeItem('token')
           setUser(null)
         }
       } catch (error) {
-        console.error('Error al verificar autenticaci\u00f3n:', error)
+        console.error('Error al verificar autenticacion:', error)
         localStorage.removeItem('token')
         setUser(null)
       } finally {
@@ -48,17 +53,23 @@ export const AuthProvider = ({ children }) => {
 
       // backend may return { token, user } or { token, usuario }
       const token = response?.token || response?.data?.token
-      const userObj = response?.user || response?.usuario || response?.data || null
+      const userObj = response?.user || response?.usuario || response?.data?.user || response?.data || null
 
       if (!token) {
         throw new Error('Respuesta de login inv\u00e1lida: no token')
       }
 
+      const normalizedUser = {
+      ...userObj,
+      id_colegio: userObj?.id_colegio ?? null,
+      rol: userObj?.rol || userObj?.role || 'user'
+    }
+    setUser(normalizedUser)
+    
       localStorage.setItem('token', token)
-      setUser(userObj)
-
+      console.log('🔐 Token guardado:', token)
       // Determine role safely
-      const role = (userObj && (userObj.rol || userObj.role)) || null
+      const role = normalizedUser.rol
       const redirectPath = role === 'admin' ? '/admin' : '/users'
       router.push(redirectPath)
 
@@ -72,6 +83,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null)
     localStorage.removeItem('token')
+    localStorage.removeItem('user')
     router.push('/login')
   }
 

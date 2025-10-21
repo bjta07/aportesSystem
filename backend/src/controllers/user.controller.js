@@ -78,7 +78,8 @@ const login = async (req, res) => {
             id_usuario: user.id_usuario,
             email: user.email,
             usuario: user.usuario,
-            rol: user.rol
+            rol: user.rol,
+            id_colegio: user.id_colegio
         }, process.env.JWT_SECRET, { expiresIn: '8h'})
         return res.json({
             token,
@@ -86,7 +87,8 @@ const login = async (req, res) => {
                 id_usuario: user.id_usuario,
                 nombre: user.nombre,
                 usuario: user.usuario,
-                rol: user.rol
+                rol: user.rol,
+                id_colegio: user.id_colegio
             }
         })
     } catch (error) {

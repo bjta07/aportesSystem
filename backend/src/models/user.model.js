@@ -30,7 +30,24 @@ const findOneByUsuario = async (usuario) => {
 //obtener por id
 const findOneById = async (id_usuario) => {
     const query = {
-        text: `SELECT id_usuario, nombre, usuario, email, password, rol, id_colegio, apellidos FROM usuarios WHERE id_usuario = $1`,
+        text: `
+            SELECT
+                u.id_usuario,
+                u.nombre,
+                u.usuario,
+                u.email,
+                u.password,
+                u.rol,
+                u.id_colegio,
+                u.apellidos,
+                c.nombre AS nombre_colegio
+            FROM
+                usuarios u  -- ¡Agregué el alias 'u' aquí!
+            INNER JOIN
+                colegio c ON u.id_colegio = c.id_colegio  -- Corregido: Especificamos u.id_colegio
+            WHERE
+                u.id_usuario = 2
+        `,
         values: [id_usuario]
     }
     const { rows } = await db.query(query)
