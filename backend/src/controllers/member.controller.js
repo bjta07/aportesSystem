@@ -133,6 +133,7 @@ const updateMember = async (req, res) => {
                 celular
             } = req.body
         
+        if (!id_afiliado) return res.status(400).json({ ok: false, msg: 'id_afiliado is required' })
         const member = await MemberModel.findById(id_afiliado)
         if (!member) return res.status(404).json({
             ok: false,

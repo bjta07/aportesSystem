@@ -20,7 +20,20 @@ const createUser = async({
 //obtener usuario
 const findOneByUsuario = async (usuario) => {
     const query = {
-        text: `SELECT id_usuario, nombre, usuario, email, password, rol, id_colegio, apellidos FROM usuarios WHERE usuario = $1`,
+        text: `
+            SELECT 
+                u.id_usuario, 
+                u.nombre, 
+                u.usuario, 
+                u.email, 
+                u.password, 
+                u.rol, 
+                u.id_colegio, 
+                u.apellidos,
+                c.nombre AS nombre_colegio
+            FROM usuarios u
+            LEFT JOIN colegio c ON u.id_colegio = c.id_colegio
+            WHERE usuario = $1`,
         values: [usuario]
     }
     const { rows } = await db.query(query)
@@ -42,11 +55,11 @@ const findOneById = async (id_usuario) => {
                 u.apellidos,
                 c.nombre AS nombre_colegio
             FROM
-                usuarios u  -- ¡Agregué el alias 'u' aquí!
-            INNER JOIN
-                colegio c ON u.id_colegio = c.id_colegio  -- Corregido: Especificamos u.id_colegio
+                usuarios u
+            LEFT JOIN
+                colegio c ON u.id_colegio = c.id_colegio
             WHERE
-                u.id_usuario = 2
+                u.id_usuario = $1
         `,
         values: [id_usuario]
     }

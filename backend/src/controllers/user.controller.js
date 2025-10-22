@@ -14,6 +14,10 @@ const registrarUsuario = async (req, res) => {
             return res.status(409).json({ ok: false, msg: 'User already exists'})
         }
 
+        if (rol === 'user' && !id_colegio) {
+            return res.status(400).json({ ok: false, msg: 'id_colegio es obligatorio para usuarios de tipo user' })
+        }
+
         const salt = await bcryptjs.genSalt(10)
         const hashedPassword = await bcryptjs.hash(password, salt)
 
@@ -32,7 +36,8 @@ const registrarUsuario = async (req, res) => {
                 id_usuario: newUser.id_usuario,
                 email: newUser.email,
                 usuario: newUser.usuario,
-                rol: newUser.rol
+                rol: newUser.rol,
+                id_colegio: newUser.id_colegio
             },
             process.env.JWT_SECRET,
             { expiresIn: '8h'}

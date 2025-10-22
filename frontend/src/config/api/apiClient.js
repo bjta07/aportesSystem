@@ -36,28 +36,36 @@ export async function fetchApi(url, options = {}){
             throw err
         }
         console.log('[apiClient] fetch resolved for:', apiUrl)
-        const contentType = response.headers.get('content-type')
-        if (!contentType || !contentType.includes('application/json')) {
-            const text = await response.text()
-            console.error('Respuesta no-JSON: ', text)
-            throw new Error('El servidor no respondio con JSON valido')
-        }
-        // Attempt to parse JSON; if no content (204) handle gracefully
+        // Try to parse JSON when possible. Some endpoints may return 204 or
+        // omit content-type; handle both cases gracefully and include raw
+        // text in the error diagnostics when JSON parsing fails.
         let data = null
         try {
+            // If no content (204) fetch.json() may throw; handle it.
             data = await response.json()
         } catch (err) {
-            // No JSON body
-            data = null
+            // Attempt to get raw text to aid debugging
+            try {
+                const text = await response.text()
+                data = text || null
+                console.warn('[apiClient] Response is not JSON, raw text:', text)
+            } catch (textErr) {
+                data = null
+            }
         }
 
-    console.log('[apiClient] Response status:', response.status, 'data:', data)
+        console.log('[apiClient] Response status:', response.status, 'data:', data)
 
         if (!response.ok) {
-            const errorMsg = data.error || data.message || 'Error en la solicitud'
-            console.error('Error de API', errorMsg)
-            throw new Error(errorMsg)
+            const errorMsg = (data && typeof data === 'object' && (data.error || data.message)) ||
+                (typeof data === 'string' ? data : 'Error en la solicitud')
+            console.error('Error de API', { status: response.status, message: errorMsg, data })
+            const err = new Error(errorMsg)
+            err.status = response.status
+            err.data = data
+            throw err
         }
+
         return data
     } catch (error) {
         console.error('Error en fetchApi', error)

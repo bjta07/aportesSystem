@@ -20,10 +20,11 @@ export default function Navbar({ collapsed }){
     ]
 
     const userLinks = [
-        { href: `${basePath}`, label: 'Dashboard', icon: 'user'},
-        { href: `${basePath}/afiliados/nuevo`, label: 'Registrar Afiliado', icon: 'users'},
-        { href: `${basePath}/afiliados`, label: 'Afiliados', icon: 'users'},
-        { href: `${basePath}/aportes`, label: 'Aportes', icon: 'editCash'}
+        { href: `${basePath}/${user.id_colegio}`, label: 'Dashboard', icon: 'user'},
+        { href: `${basePath}/${user.id_colegio}/afiliados/nuevo`, label: 'Registrar Afiliado', icon: 'users'},
+        { href: `${basePath}/${user.id_colegio}/afiliados`, label: 'Afiliados', icon: 'users'},
+        { href: `${basePath}/${user.id_colegio}/aportes`, label: 'Aportes', icon: 'editCash'},
+        { href: `${basePath}/${user.id_colegio}/reports`, label: 'Informes', icon: 'report'}
     ]
 
     const links = user.rol === 'admin' ? adminLinks : userLinks

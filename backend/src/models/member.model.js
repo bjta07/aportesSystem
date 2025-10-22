@@ -37,14 +37,22 @@ const createMember = async ({
 }
 
 const findById = async(id_afiliado) => {
+    const id = Number(id_afiliado)
+    if (!Number.isFinite(id)) {
+        const err = new Error('Invalid id_afiliado parameter')
+        err.code = 'INVALID_ID'
+        throw err
+    }
     const query = {
         text: `
             SELECT id_afiliado,matricula_profesional, nro_registro_colegio, nombres, apellidos, ci, fecha_afiliacion, estado, id_colegio, email,celular
             FROM afiliado
             WHERE id_afiliado = $1
         `,
-        values: [id_afiliado]
+        values: [id]
     }
+    // Debug: log query before executing to help trace parameter issues
+    // console.debug('MemberModel.findById query:', query)
     const { rows } = await db.query(query)
     return rows[0]
 }
@@ -88,9 +96,23 @@ const findByCi = async(ci) => {
 const findByColegio = async(id_colegio) => {
     const query = {
         text: `
-            SELECT ci, nombres, apellidos, estado, id_colegio, email,celular
-            FROM afiliado
-            WHERE id_colegio = $1
+            SELECT
+                a.id_afiliado, 
+                a.ci, 
+                a.nombres,
+                a.matricula_profesional,
+                a.nro_registro_colegio, 
+                a.apellidos, 
+                a.estado, 
+                a.id_colegio, 
+                a.email,
+                a.celular,
+                a.fecha_afiliacion,
+                TO_CHAR(a.fecha_afiliacion, 'DD/MM/YY') AS fecha_afiliacion_formateada,
+                c.nombre AS nombre_colegio
+            FROM afiliado a
+            LEFT JOIN colegio c ON a.id_colegio = c.id_colegio
+            WHERE a.id_colegio = $1
             ORDER BY apellidos DESC
         `,
         values : [id_colegio]
@@ -118,7 +140,7 @@ const updateMemeber = async(id_afiliado, {
                     nombres = $4,
                     apellidos = $5,
                     ci = $6,
-                    fecha_afiliacion = $7,
+                    TO_CHAR(fecha_afiliacion, 'DD/MM/YYYY') AS new_fecha_afiliacion = $7,
                     estado = $8,
                     id_colegio = $9,
                     email = $10,

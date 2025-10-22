@@ -10,6 +10,12 @@
     padding: 15px 35px;
 }
 
+.tableContainer h2{
+  font-weight: bolder;
+  font-size: 25px;
+  color: #212529;
+}
+
 .table {
     width: 100%;
     border-collapse: collapse;
