@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
       console.log('🔐 Token guardado:', token)
 
       const role = normalizedUser.rol
-      const redirectPath = role === 'admin' ? '/admin' : '/users'
+      const redirectPath = role === 'admin' ? '/admin' : `/users`
       router.push(redirectPath)
       return { success: true }
     } catch (error) {

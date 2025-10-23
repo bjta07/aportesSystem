@@ -42,7 +42,7 @@ export default function DetalleAfiliadoModal({
                 nombres: member.nombres ?? "",
                 apellidos: member.apellidos ?? "",
                 ci: member.ci ?? "",
-                fecha_afiliacion: member.fecha_afiliacion ?? "",
+                new_fecha_afiliacion: member.new_fecha_afiliacion ?? "",
                 estado: member.estado ?? "",
                 id_colegio: member.id_colegio ?? "",
                 email: member.email ?? "",

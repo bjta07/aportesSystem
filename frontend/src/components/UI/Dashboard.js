@@ -3,9 +3,12 @@
 import { useAuth } from "@/config/contexts/AuthContext"
 import Link from "next/link"
 import styles from '@/styles/Dashboard.module.css'
+import authApi from "@/config/api/userApi"
 
 export default function UserDashboard(){
     const { user } = useAuth()
+
+    const response = authApi.getProfile()
 
     return (
         <div className={styles.main}>

@@ -1,4 +1,5 @@
 import { fetchApi } from "./apiClient";
+import { fetchApiUpload } from "./apiClient";
 
 export const memberApi = {
     registerMember: async(memberData) => fetchApi('members',{
@@ -16,9 +17,11 @@ export const memberApi = {
             const response = await fetchApi('members')
 
             if (response && response.data) {
+                console.log(response)
                 return{
                     ok: true,
                     data: Array.isArray(response.data) ? response.data : [response.data]
+                    
                 }
             }
 
@@ -148,6 +151,10 @@ export const memberApi = {
                 message: error.message || 'No se pudo eliminar al usuario'
             }
         }
+    },
+
+    uploadMember: async(formData) => {
+        return fetchApiUpload('members/bulk-upload', formData)
     }
 }
 

@@ -19,8 +19,6 @@ export default function AfiliadosPage (){
     const [searchFilters, setSearchFilters] = useState({ci:''})
 
     const handleVerDetalle = (member) => {
-        console.log('🟢 Afiliado seleccionado:', member)
-        console.log('🟢 ID Afiliado:', member?.id_afiliado)
         setSelectedMember(member)
         setIsModalOpen(true)
     }
@@ -117,11 +115,6 @@ export default function AfiliadosPage (){
         }
         return filtered.sort((a,b) => a.apellidos.localeCompare(b.apellidos))
     }, [members, searchFilters])
-
-    const handleCloseModal = () => {
-        setIsModalOpen(false)
-        setSelectedMember(null)
-    }
 
     useEffect(() => {
     const fetchMembers = async () => {

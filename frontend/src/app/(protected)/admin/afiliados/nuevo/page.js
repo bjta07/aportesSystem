@@ -211,8 +211,8 @@ export default function CreateMemberPage(){
                                     <option value="11">Colegio regional de Camiri</option>
                                     <option value="12">Colegio regional de Tupiza</option>
                                     <option value="13">Colegio regional de Catavi</option>
-                                    <option value="13">Colegio regional de Riberalta</option>
-                                    <option value="13">Colegio regional de Yacuiba</option>
+                                    <option value="14">Colegio regional de Riberalta</option>
+                                    <option value="15">Colegio regional de Yacuiba</option>
                                 </optgroup>
                         </select>
                     </div>

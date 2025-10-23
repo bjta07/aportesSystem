@@ -69,6 +69,7 @@ const findAll = async() => {
                 a.nombres,
                 a.apellidos,
                 a.id_colegio,
+                a.celular,
                 c.nombre AS nombre_colegio,
                 a.fecha_afiliacion,
                 TO_CHAR(a.fecha_afiliacion, 'DD/MM/YY') AS fecha_afiliacion_formateada
@@ -140,13 +141,13 @@ const updateMemeber = async(id_afiliado, {
                     nombres = $4,
                     apellidos = $5,
                     ci = $6,
-                    TO_CHAR(fecha_afiliacion, 'DD/MM/YYYY') AS new_fecha_afiliacion = $7,
+                    fecha_afiliacion = $7,
                     estado = $8,
                     id_colegio = $9,
                     email = $10,
                     celular = $11
                 WHERE id_afiliado = $1
-                RETURNING *
+                RETURNING *;
             `,
             values: [
                 id_afiliado,

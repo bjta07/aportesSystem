@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import Icon from "@/components/UI/Icons"
 import styles from '@/styles/MemberPage.module.css'
 import DetalleAfiliadoModal from "./componentes/DetalleAfiliadoModal"
+import BulkUploadModal from "./componentes/SubirSVModal"
 
 export default function MemberList(){
     const [members, setMembers] = useState([])
@@ -14,6 +15,7 @@ export default function MemberList(){
     const [error, setError] = useState(null)
     const [selectedMember, setSelectedMember] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isUploadFilesModalOpen, setIsUploadFilesModalOpen] = useState(false)
     const [searchFilters, setSearchFilters] = useState({
         ci:'',
         id_colegio:''
@@ -133,6 +135,14 @@ export default function MemberList(){
         setSelectedMember(null)
     }
 
+    const handleCloseUploadModal = () => {
+        setIsUploadFilesModalOpen(false)
+    }
+
+    const handleOpenFilesUpload = () => {
+        setIsUploadFilesModalOpen(true)
+    }
+
     useEffect(() => {
         const fetchMembers = async () => {
             setLoading(true)
@@ -217,6 +227,8 @@ export default function MemberList(){
                     <button onClick={clearSearch} className={styles.clearButton}>
                         <Icon name="erase" fill/>Limpiar filtros
                     </button>
+
+                    <button className={styles.uploadButton} onClick={handleOpenFilesUpload}>Cargar afiliados desde archivo</button>
                 </div>
                 <div className={styles.resultsInfo}>
                     <p>Mostrando {filteredAndSortedMembers.length} de {members.length} afiliados</p>
@@ -280,6 +292,11 @@ export default function MemberList(){
                 onSave={handleSave}
                 onDelete={handleDelete}
                 userRol={currentUser?.rol}
+            />
+
+            <BulkUploadModal
+                isOpen={isUploadFilesModalOpen}
+                onClose={handleCloseUploadModal}
             />
         </div>
     )

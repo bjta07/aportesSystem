@@ -218,6 +218,6 @@ export const UserController = {
     updateRol,
     deleteUsuario,
     findAll,
-    updateUser
+    updateUser,
 }
 

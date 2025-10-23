@@ -28,24 +28,24 @@ export default function CreateUserPage(){
         
         const userData = { ...formData, rol }
         const registerPromise = new Promise(async (resolve, reject) => {
-            try {
-                const response = await authApi.register(userData)
-                
-                if (response.ok) {
-                    resolve('Usuario creado con éxito'); 
-                } else {
-                    const errorData = await response.json()
-
-                    if (response.status === 409) { 
+            authApi.register(userData)
+            .then(response => {
+            if (response.ok) {
+                resolve('Usuario creado con éxito');
+            } else {
+                return response.json().then(errorData => {
+                    if (response.status === 409) {
                         reject(new Error(errorData.message || 'El usuario ya se encuentra registrado.'));
                     } else {
                         reject(new Error(errorData.message || 'No se pudo crear el usuario.'));
                     }
-                }
-            } catch (error) {
-                console.error("Error en la conexión:", error);
-                reject(new Error("Error en la conexión con el servidor."));
+                });
             }
+        })
+        .catch(error => {
+            console.error("Error en la conexión:", error);
+            reject(new Error("Error en la conexión con el servidor."));
+        });
         });
 
         toast.promise(registerPromise, {
@@ -113,21 +113,24 @@ export default function CreateUserPage(){
                             required
                         >
                             <option value="">Seleccione...</option>
-                            <optgroup label="Departamentales">
-                                <option value="2">Colegio departamental de Santa Cruz</option>
-                                <option value="3">Colegio departamental de La Paz</option>
-                                <option value="4">Colegio departamental de Cochabamba</option>
-                                <option value="5">Colegio departamental de Oruro</option>
-                                <option value="6">Colegio departamental de Potosí</option>
-                                <option value="7">Colegio departamental de Tarija</option>
-                                <option value="8">Colegio departamental de Sucre</option>
-                                <option value="9">Colegio departamental de Pando</option>
+                            <optgroup label="Colegios Departamentales">
+                                <option value="1">Colegio departamental de La Paz</option>
+                                <option value="2">Colegio departamental de Oruro</option>
+                                <option value="3">Colegio departamental de Cochabamba</option>
+                                <option value="4">Colegio departamental de Santa Cruz</option>
+                                <option value="5">Colegio departamental de Tarija</option>
+                                <option value="6">Colegio departamental de Potosi</option>
+                                <option value="7">Colegio departamental de Beni</option>
+                                <option value="8">Colegio departamental de Pando</option>
+                                <option value="9">Colegio departamental de Chuquisaca</option>
                             </optgroup>
-                            <optgroup label="Regionales">
+                            <optgroup label="Colegios Regionales">
                                 <option value="10">Colegio regional de El Alto</option>
-                                <option value="11">Colegio regional de Tupiza</option>
-                                <option value="12">Colegio regional de Camiri</option>
+                                <option value="11">Colegio regional de Camiri</option>
+                                <option value="12">Colegio regional de Tupiza</option>
                                 <option value="13">Colegio regional de Catavi</option>
+                                <option value="14">Colegio regional de Riberalta</option>
+                                <option value="15">Colegio regional de Yacuiba</option>
                             </optgroup>
                         </select>
                     </div>

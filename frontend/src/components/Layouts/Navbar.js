@@ -20,7 +20,7 @@ export default function Navbar({ collapsed }){
     ]
 
     const userLinks = [
-        { href: `${basePath}/${user.id_colegio}`, label: 'Dashboard', icon: 'user'},
+        { href: `${basePath}/`, label: 'Dashboard', icon: 'user'},
         { href: `${basePath}/${user.id_colegio}/afiliados/nuevo`, label: 'Registrar Afiliado', icon: 'users'},
         { href: `${basePath}/${user.id_colegio}/afiliados`, label: 'Afiliados', icon: 'users'},
         { href: `${basePath}/${user.id_colegio}/aportes`, label: 'Aportes', icon: 'editCash'},

@@ -72,3 +72,47 @@ export async function fetchApi(url, options = {}){
         throw error
     }
 }
+
+export async function fetchApiUpload(url, formData) {
+    if (!API_HOST) {
+        throw new Error('API_HOST no esta definido')
+    }
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+
+    const defaultHeaders = {
+        ...(token && { Authorization: `Bearer ${token}`})
+    }
+
+    const apiUrl = `${API_HOST}/api/${url}`.replace('/([^:]\/)\/+/g, "$1"')
+    console.log('🚀 Uploading to: ', apiUrl)
+
+    const config = {
+        method: 'POST',
+        headers: defaultHeaders,
+        body: formData
+    }
+
+    try {
+        const response = await fetch(apiUrl, config)
+        const contentType = response.headers.get('content-type')
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text()
+            console.error('Respuesta no-JSON', text)
+            throw new Error('El servidor no respondio con JSON valido')
+        }
+        const data = await response.json()
+
+        if (!response.ok) {
+            const errorMsg = data.error || data.message || 'Error en la solicitu'
+            console.error('Error de Api', errorMsg)
+            throw new Error(errorMsg)
+        }
+
+        return data
+    } catch (error) {
+        console.error('Error en fetchApiUpload: ', error)
+        throw error
+    }
+}
+

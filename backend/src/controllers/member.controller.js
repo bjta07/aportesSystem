@@ -1,4 +1,5 @@
 import { MemberModel } from "../models/member.model.js";
+import XLSX from 'xlsx'
 
 const createMember = async (req, res) => {
     try {
@@ -266,6 +267,97 @@ const deleteEspecialidad = async (req, res) => {
     }
 }
 
+const bulkUpload = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        ok: false,
+        error: 'No se subió ningún archivo'
+      })
+    }
+
+    const workbook = XLSX.readFile(req.file.path)
+    const sheet = workbook.Sheets[workbook.SheetNames[0]]
+    const data = XLSX.utils.sheet_to_json(sheet, { defval: "" })
+
+    const resultados = []
+
+    for (const row of data) {
+      const {
+        matricula_profesional,
+        nro_registro_colegio,
+        nombres,
+        apellidos,
+        ci,
+        fecha_afiliacion,
+        estado,
+        id_colegio,
+        email,
+        celular
+      } = row
+
+      // Validación básica
+      if (!matricula_profesional || !nro_registro_colegio || !nombres || !apellidos || !ci ||
+          !fecha_afiliacion || !estado || !id_colegio || !email || !celular) {
+        resultados.push({ ci, status: 'Error', message: 'Datos incompletos' })
+        continue
+      }
+
+      const ciLimpio = String(ci).trim()
+
+      // Evita duplicados
+      const existente = await MemberModel.findByCi(ciLimpio)
+      if (existente) {
+        resultados.push({ ci: ciLimpio, status: 'Duplicado', message: 'El CI ya existe en la base de datos' })
+        continue
+      }
+
+      // Limpieza y formato de datos
+      const fecha_afiliacionLimpio =
+        typeof fecha_afiliacion === 'number'
+          ? XLSX.SSF.format('yyyy-mm-dd', fecha_afiliacion)
+          : fecha_afiliacion
+
+      const id_colegioNum = parseInt(String(id_colegio).trim())
+      if (isNaN(id_colegioNum)) {
+        resultados.push({ ci: ciLimpio, status: 'Error', message: 'ID de colegio inválido' })
+        continue
+      }
+
+      try {
+        const afiliado = await MemberModel.createMember({
+          matricula_profesional: String(matricula_profesional).trim(),
+          nro_registro_colegio: String(nro_registro_colegio).trim(),
+          nombres: String(nombres).trim(),
+          apellidos: String(apellidos).trim(),
+          ci: ciLimpio,
+          fecha_afiliacion: fecha_afiliacionLimpio,
+          estado: String(estado).trim(),
+          id_colegio: id_colegioNum,
+          email: String(email).trim(),
+          celular: String(celular).trim(),
+        })
+        resultados.push({ ci: ciLimpio, status: 'OK', afiliado })
+      } catch (error) {
+        resultados.push({
+          ci: ciLimpio,
+          status: 'Error',
+          message: `Error al crear afiliado: ${error.message}`
+        })
+      }
+    }
+
+    return res.json({ ok: true, resultados })
+  } catch (error) {
+    console.error('Error en bulkUpload:', error)
+    return res.status(500).json({
+      ok: false,
+      error: 'Error al procesar el archivo',
+      details: error.message
+    })
+  }
+}
+
 
 export const MemberController = {
     createMember,
@@ -276,6 +368,7 @@ export const MemberController = {
     deleteMember,
     addEspecialidades,
     getEspecialidadesByAfiliado,
+    bulkUpload,
     deleteEspecialidad
 }
 

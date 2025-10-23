@@ -39,21 +39,6 @@ export default function Reports(){
         "12": "Colegio regional de Catavi"
     }
 
-    const especialidades = {
-        "1": "Licenciatura en Enfermeria",
-        "2": "Master en Medico Quirurgica",
-        "3": "Master en Enfermeria Quirurgica",
-        "4": "Master en Enfermeria Ginecoobstetricia",
-        "5": "Master en Enfermeria Pediatrica",
-        "6": "Master en Enfermeria en Salud Mental",
-        "7": "Master en Enfermeria en Salud Publica",
-        "8": "Master en Enfermeria Administracion de Servicios de Salud",
-        "9": "Master en Educacion",
-        "10": "Master en Investigacion",
-        "11": "Master en Enfermeria en Medicina Critica y Terapia Intensiva",
-        "12": "Master en Geriatria y Gerontologia"
-    }
-
     const handleSearchChange = (field, value) => {
         setSearchFilters(prev => ({
             ...prev,
@@ -180,6 +165,123 @@ export default function Reports(){
         }
         return rows
     }
+
+    const generateAfiliadosPDF = async () => {
+  try {
+    if (!filteredAndSortedMembers?.length) {
+      alert("No hay afiliados filtrados para generar el PDF.");
+      return;
+    }
+
+    const doc = new jsPDF({ orientation: "landscape" });
+
+    // 🧾 Encabezado
+    doc.setFontSize(16);
+    doc.text("LISTADO DE AFILIADOS POR COLEGIO", 14, 15);
+
+    doc.setFontSize(11);
+    const colegioName =
+      searchFilters.id_colegio && colegios[searchFilters.id_colegio]
+        ? colegios[searchFilters.id_colegio]
+        : "Todos los colegios";
+
+    doc.text(`Colegio: ${colegioName}`, 14, 23);
+    doc.text(`Generado por: ${currentUser?.nombre || "Administrador"}`, 14, 30);
+    doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 37);
+
+    // 📋 Obtener especialidades
+    const afiliadosConEspecialidades = await Promise.all(
+      filteredAndSortedMembers.map(async (m) => {
+        let especialidad = "Sin especialidad";
+
+        try {
+          const res = await memberApi.getEspecialidadByAfiliado(m.id_afiliado);
+          if (res.ok && Array.isArray(res.data) && res.data.length > 0) {
+            especialidad = res.data.map((e) => e.especialidad).join(", ");
+          }
+        } catch (error) {
+          console.error(`Error al obtener especialidad de ${m.nombres}:`, error);
+        }
+
+        return {
+          matricula_profesional: m.matricula_profesional || "",
+          nro_registro_colegio: m.nro_registro_colegio || "",
+          nombres: m.nombres || "",
+          apellidos: m.apellidos || "",
+          ci: m.ci || "",
+          fecha_afiliacion_formateada: m.fecha_afiliacion_formateada || "",
+          especialidad,
+          email: m.email || "",
+          celular: m.celular || "",
+          nombre_colegio:
+            colegios[m.id_colegio] || m.nombre_colegio || "Desconocido",
+        };
+      })
+    );
+
+    // 🧠 Datos para la tabla
+    const tableData = afiliadosConEspecialidades.map((a) => [
+      a.matricula_profesional,
+      a.nro_registro_colegio,
+      a.nombres,
+      a.apellidos,
+      a.ci,
+      a.fecha_afiliacion_formateada,
+      a.especialidad,
+      a.email,
+      a.celular,
+      a.nombre_colegio,
+    ]);
+
+    // 🧾 Tabla PDF
+    autoTable(doc, {
+      startY: 45,
+      head: [
+        [
+          "Mat-Prof",
+          "N°-Reg",
+          "Nombres",
+          "Apellidos",
+          "CI",
+          "Fecha de Afiliación",
+          "Especialidad",
+          "Email",
+          "Celular",
+          "Colegio",
+        ],
+      ],
+      body: tableData,
+      styles: {
+        fontSize: 9,
+        cellPadding: 2,
+        lineColor: [220, 220, 220],
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontStyle: "bold",
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245],
+      },
+      margin: { left: 10, right: 10 },
+      columnStyles: {
+        0: { cellWidth: 20, halign: "center" }, // Mat-Prof
+        1: { cellWidth: 20, halign: "center" }, // N°-Reg
+        4: { cellWidth: 25, halign: "center" }, // CI
+      },
+    });
+
+    // 📤 Mostrar PDF
+    const pdfBlob = doc.output("blob");
+    const blobUrl = URL.createObjectURL(pdfBlob);
+    window.open(blobUrl, "_blank");
+  } catch (error) {
+    console.error("Error al generar PDF de afiliados:", error);
+    alert("Ocurrió un error al generar el PDF.");
+  }
+};
+
 
     const generatePDF = () => {
         if (!selectedYear) {
@@ -337,6 +439,14 @@ export default function Reports(){
             <button onClick={generatePDF} className={styles.buttonPrimary}>
                 Generar PDF
             </button>
+
+            <button
+                onClick={generateAfiliadosPDF}
+                className={styles.buttonSecondary}
+            >
+                Generar Lista de Afiliados
+            </button>
+
         </div>
 
         <div className={styles.preview}>
