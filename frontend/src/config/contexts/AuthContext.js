@@ -32,7 +32,8 @@ export const AuthProvider = ({ children }) => {
             ...profile,
             id_colegio: profile?.id_colegio ?? null,
             rol: profile?.rol || profile?.role || 'user',
-            nombre_colegio: profile?.nombre_colegio ?? 'Administrador'
+            nombre_colegio: profile?.nombre_colegio // Usa el nombre si existe
+    || (profile?.rol === 'admin' ? 'Administrador Central' : 'Sin colegio asignado'),
           }
           setUser(normalizedProfile)
           localStorage.setItem('user', JSON.stringify(normalizedProfile))

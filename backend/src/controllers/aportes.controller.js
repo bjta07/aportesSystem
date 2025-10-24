@@ -208,6 +208,77 @@ async getAllYears (req, res) {
     }
   },
 
+  //Obtener aportes totales por departamento
+async getByDepartamento(req, res) {
+  try {
+    const { anio } = req.query; // Ejemplo: /api/aportes/departamentos?anio=2025
+    const data = await AporteModel.findByDepartamento(anio);
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        msg: 'No se encontraron aportes agrupados por departamento.'
+      });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      data
+    });
+  } catch (error) {
+    console.error('Error en AportesController.getByDepartamento:', error);
+    return res.status(500).json({
+      ok: false,
+      error: 'Error al obtener totales por departamento.'
+    });
+  }
+},
+
+async getAportesByMes (req, res) {
+    try {
+        const { anio } = req.query
+
+        if (!anio) {
+            return res.status(400).json({ ok: false, msg: 'Debe especificar un año'})
+        }
+        const data = await AporteModel.getAportesByMes(anio)
+        return res.json({
+            ok: true,
+            data
+        })
+    } catch (error) {
+        console.error('Error en getAportes', error)
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error al obtener los aportes por mes'
+        })
+    }
+},
+
+async getAportesByMesYColegio(req, res){
+  try {
+    const { anio, id_colegio } = req.query
+    if (!anio || !id_colegio) {
+      return res.status(400).json({
+        ok: false,
+        msg: 'Debe especificar un año'
+      })
+    }
+
+    const data = await AporteModel.getAporteByMesYColegio(anio, id_colegio)
+    return res.json({
+      ok: true,
+      data
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error al obtener aportes por mes y colegio'
+    })
+  }
+}
+
 //   async bulkUpload(req, res) {
 //     try {
 //       if (!req.file) {

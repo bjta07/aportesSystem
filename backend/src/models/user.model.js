@@ -159,6 +159,34 @@ const checkUsuario = async (usuario, excludeUsuario_id = null) => {
     return rows.length > 0
 }
 
+const updateProfile = async(id_usuario, {usuario, email}) => {
+    const query = {
+        text: `
+            UPDATE usuarios
+            SET usuario = $2, email = $3
+            WHERE id_usuario = $1
+            RETURNING id_usuario, nombre, email, rol, id_colegio, apellidos, usuario
+        `,
+        values: [id_usuario, usuario, email]
+    }
+    const { rows } = await db.query(query)
+    return rows[0]
+}
+
+const updatePassword = async (id_usuario, hashedPassword) => {
+    const query = {
+        text: `
+            UPDATE usuarios
+            SET password = $2
+            WHERE id_usuario = $1
+            RETURNING id_usuario, nombre, usuario, email
+        `,
+        values: [id_usuario, hashedPassword]
+    }
+    const { rows } = await db.query(query)
+    return rows [0]
+}
+
 export const UserModel = {
     createUser,
     findOneByUsuario,
@@ -168,4 +196,6 @@ export const UserModel = {
     updateRol,
     deleteUsuario,
     checkUsuario,
+    updateProfile,
+    updatePassword
 }

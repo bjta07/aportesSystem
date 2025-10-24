@@ -15,8 +15,8 @@ export default function Navbar({ collapsed }){
         { href: `${basePath}/usuarios`, label: 'Usuarios', icon: 'user'},
         { href: `${basePath}/usuarios/nuevo`, label: 'Crear usuario', icon: 'addUser'},
         { href: `${basePath}/afiliados`, label: 'Afiliados', icon: 'users'},
-        { href: `${basePath}/afiliados/nuevo`, label: 'Registrar Afiliado', icon: 'addUsers'},
-        { href: `${basePath}/informes`, label: 'Informes', icon: 'editCash'}
+        { href: `${basePath}/afiliados/nuevo`, label: 'Registrar Afiliado', icon: 'addUser'},
+        { href: `${basePath}/informes`, label: 'Informes', icon: 'report'}
     ]
 
     const userLinks = [

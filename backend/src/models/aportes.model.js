@@ -274,6 +274,72 @@ const deleteAporte = async ({ id }) => {
     return { message: "Aporte eliminado correctamente" };
 };
 
+//Obtener totales por departamento
+const findByDepartamento = async (anio = null) => {
+  // Si viene año, agregamos el WHERE dinámico
+  const query = {
+    text: `
+      SELECT 
+        c.nombre AS departamento,
+        SUM(ap.monto) AS total
+      FROM afiliado a
+      JOIN colegio c ON a.id_colegio = c.id_colegio
+      JOIN aportes ap ON ap.afiliado_id = a.id_afiliado
+      ${anio ? 'WHERE ap.anio = $1' : ''}
+      GROUP BY c.nombre
+      ORDER BY total DESC
+    `,
+    values: anio ? [anio] : []
+  };
+
+  try {
+    const { rows } = await db.query(query);
+    return rows.map(r => ({
+      departamento: r.departamento,
+      total: parseFloat(r.total),
+    }));
+  } catch (error) {
+    console.error('Error en AporteModel.findByDepartamento:', error);
+    throw error;
+  }
+};
+
+const getAportesByMes = async(anio) => {
+  try {
+    const query = `
+      SELECT mes, SUM(monto) AS total
+      FROM aportes
+      WHERE anio = $1
+      GROUP BY mes
+      ORDER BY mes asc
+    `
+    const { rows } = await db.query(query, [anio])
+    return rows
+  } catch (error) {
+    throw error
+  }
+}
+
+const getAporteByMesYColegio = async(anio, id_colegio) => {
+  try {
+    const query = `
+      SELECT mes,
+      SUM(monto) AS total
+      FROM aportes
+      WHERE anio = $1
+      AND afiliado_id IN (
+        SELECT id FROM afiliado WHERE id_colegio = $2
+      )
+    GROUP BY mes
+    ORDER BY mes ASC;
+    `
+    const { rows } = await db.query(query, [anio, id_colegio])
+    return rows
+  } catch (error) {
+    throw error
+  }
+}
+
 export const AporteModel = {
     create,
     update,
@@ -282,5 +348,8 @@ export const AporteModel = {
     findByFechaRegistro,
     findByAnio,
     findAllYears,
-    deleteAporte
+    deleteAporte,
+    findByDepartamento,
+    getAportesByMes,
+    getAporteByMesYColegio
 };

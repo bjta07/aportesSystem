@@ -13,6 +13,9 @@ router.get('/', verifyActiveAdmin, AportesController.getAll)
 router.get('/afiliado/:id', verifyActiveUserOrAdmin, AportesController.getByAfiliado)
 router.get('/anios-aportes', verifyActiveUserOrAdmin,  AportesController.getYearsAndAportes)
 router.get('/anios', verifyActiveUserOrAdmin, AportesController.getAllYears)
+router.get('/departamentos', verifyActiveAdmin, AportesController.getByDepartamento)
+router.get('/meses', verifyActiveUserOrAdmin, AportesController.getAportesByMes)
+router.get('/meses-colegio', verifyActiveUserOrAdmin, AportesController.getAportesByMesYColegio)
 
 
 router.put('/:id', verifyActiveAdmin,  AportesController.update)

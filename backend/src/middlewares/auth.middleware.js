@@ -141,19 +141,16 @@ export const verifyUser = (req, res, next) => {
 //Verificar cuenta
 export const verifyOwner = async (req, res, next) => {
     try {
-        if ((!req.uid)) {
-            return res.status(401).json({
-                ok: false,
-                error: 'Authentication required'
-            })
+        const token = req.header("Authorization")?.replace("Bearer ", "");
+        if (!token) {
+            return res.status(401).json({ ok: false, error: "Token requerido" });
         }
 
-        return next()
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.id_usuario = decoded.id_usuario; // 👈 Aquí lo asignas
+        next();
     } catch (error) {
-        return res.status(500).json({
-            ok: false,
-            error: 'Server error verifying ownership'
-        })
+        return res.status(401).json({ ok: false, error: "Token inválido" });
     }
 }
 

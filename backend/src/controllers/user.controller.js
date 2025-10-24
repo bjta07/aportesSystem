@@ -1,6 +1,7 @@
 import bcryptjs from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { UserModel } from '../models/user.model.js'
+import { AporteModel } from '../models/aportes.model.js'
 
 //registrar usuario
 const registrarUsuario = async (req, res) => {
@@ -211,6 +212,78 @@ const findAll = async (req, res) => {
     }
 }
 
+const updatePersonalProfile = async (req, res) => {
+    try {
+        const { id_usuario } = req.params
+        const { usuario, email} = req.body
+
+        if (req.id_usuario !== parseInt(id_usuario)) {
+            return res.status(403).json({
+                ok: false,
+                msg: 'No tienes permiso para actualizar ese perfil'
+            })
+        }
+        const user = await UserModel.findOneById(id_usuario)
+        if (!user) {
+            return res.status(404).json({ok:false, msg: 'Usuario no encontrado'})
+        }
+
+        const updateUser = await UserModel.updateProfile(id_usuario, {
+            usuario,
+            email,
+            nombre: user.nombre,
+            apellidos: user.apellidos
+        })
+        return res.json({
+            ok: true,
+            data: updateUser,
+            msg: 'Perfil actualizado correctamente'
+        })
+    } catch (error) {
+        return res.status(500).json({ ok: false, msg: 'Error al actualizar el perfil'})
+    }
+}
+
+const updatePassword = async (req, res) => {
+    try {
+        const { id_usuario } = req.params
+        const { currentPassword, newPassword } = req.body
+
+        if (req.id_usuario !== parseInt(id_usuario)) {
+            return res.status(403).json({
+                ok: false,
+                msg: 'No tienes permiso para cambiar esta contraseña'
+            })
+        }
+
+        const user = await UserModel.findOneById(id_usuario)
+        if (!user) {
+            return res.status(404).json({ ok: false, msg: 'Usuario no encontrado'})
+        }
+
+        const isMatch = await bcryptjs.compare(currentPassword, user.password)
+        if (!isMatch) {
+            return res.status(401).json({ ok: false, msg: 'La contraseña actual no es correcta'})
+        }
+
+        const salt = await bcryptjs.genSalt(10)
+        const hashedPassword = await bcryptjs.hash(newPassword, salt)
+
+        const updatedUser = await UserModel.updatePassword(id_usuario, hashedPassword)
+
+        return res.json({
+            ok: true,
+            data: {
+                id_usuario: updatedUser.id_usuario,
+                nombre: updatedUser.nombre
+            },
+            msg: 'Contraseña actualizada correctamente'
+        })
+    } catch (error) {
+        return res.status(500).json({ ok: false, msg: 'Error al actualizar la contraseña'})
+    }
+}
+
 export const UserController = {
     registrarUsuario,
     login,
@@ -219,5 +292,7 @@ export const UserController = {
     deleteUsuario,
     findAll,
     updateUser,
+    updatePersonalProfile,
+    updatePassword,
 }
 

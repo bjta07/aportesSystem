@@ -50,4 +50,23 @@ export const aporteApi = {
             method: 'DELETE'
         });
     },
+
+    getAportesByDepartamento: async (anio) => {
+        const url = anio
+        ? `aportes/departamentos?anio=${anio}`
+        : 'aportes/departamentos'
+        return fetchApi(url, { method: 'GET' })
+    },
+
+    getAportesByMes: async (anio) => {
+        const url = anio
+            ? `aportes/meses?anio=${anio}`
+            : 'aportes/meses'
+        return fetchApi(url, { method: 'GET' })
+    },
+
+    getAportesByMesYColegio: async (anio, id_colegio) => {
+        const url = `aportes/meses-colegio?anio=${anio}&id_colegio=${id_colegio}`
+        return fetchApi(url, { method: 'GET'})
+    }
 }

@@ -63,7 +63,17 @@ export const authApi = {
             message: error.message || 'No se pudo eliminar el usuario'
         }
     }
-}
+    },
+
+    updateProfile: (userId, profileData) => fetchApi(`users/${userId}/profile`,{
+        method: 'PUT',
+        body: JSON.stringify(profileData)
+    }),
+
+    updatePassword: (userId, passwordData) => fetchApi(`users/${userId}/password`, {
+        method: 'PUT',
+        body: JSON.stringify(passwordData)
+    })
 }
 
 export default authApi

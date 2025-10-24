@@ -14,4 +14,7 @@ router.put('/:id_usuario', verifyActiveAdmin, UserController.updateUser)
 router.put('/:uid/rol', verifyActiveAdmin, UserController.updateRol)
 router.delete('/:id_usuario', verifyActiveAdmin, verifyOwner, UserController.deleteUsuario)
 
+router.put('/:id_usuario/profile', verifyActiveToken, verifyOwner, UserController.updatePersonalProfile)
+router.put('/:id_usuario/password', verifyActiveToken, verifyOwner, UserController.updatePassword)
+
 export default router
