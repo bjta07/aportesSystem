@@ -84,7 +84,7 @@ export async function fetchApiUpload(url, formData) {
         ...(token && { Authorization: `Bearer ${token}`})
     }
 
-    const apiUrl = `${API_HOST}/api/${url}`.replace('/([^:]\/)\/+/g, "$1"')
+        const apiUrl = `${API_HOST}/api/${url}`.replace(/([^:]\/)\/+/g, "$1")
     console.log('🚀 Uploading to: ', apiUrl)
 
     const config = {

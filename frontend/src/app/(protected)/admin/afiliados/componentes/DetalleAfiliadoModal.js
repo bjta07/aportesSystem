@@ -366,7 +366,7 @@ export default function DetalleAfiliadoModal({
                                     <input
                                         type="date"
                                         name="fecha_afiliacion"
-                                        value={formData.fecha_afiliacion}
+                                        value={formData.fecha_afiliacion ? new Date(formData.fecha_afiliacion).toISOString().split('T')[0] : '' }
                                         onChange={handleChange}
                                         className={styles.input}
                                     />

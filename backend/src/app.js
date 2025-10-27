@@ -5,6 +5,7 @@ import dotenv from 'dotenv'
 import userRouter from './routes/user.routes.js'
 import memberRouter from './routes/member.routes.js'
 import aporteRouter from './routes/aporte.routes.js'
+import colegioRouter from './routes/colegio.routes.js'
 
 dotenv.config()
 
@@ -43,6 +44,7 @@ app.use((req, res, next) => {
 app.use('/api/users', userRouter)
 app.use('/api/members', memberRouter)
 app.use('/api/aportes', aporteRouter)
+app.use('/api/colegio', colegioRouter)
 
 
 export default app

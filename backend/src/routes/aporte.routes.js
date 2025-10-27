@@ -1,13 +1,13 @@
 import { Router } from "express";
 import { AportesController } from "../controllers/aportes.controller.js";
 import { verifyActiveAdmin, verifyActiveUserOrAdmin } from "../middlewares/auth.middleware.js";
-//import multer from "multer"
+import multer from "multer"
 
 const router = Router()
-//const upload = multer({ dest: "documents/" })
+const upload = multer({ dest: "documents/" })
 
 router.post('/', verifyActiveUserOrAdmin, AportesController.create)
-//router.post('/bulk-upload',  upload.single("file"), AportesController.bulkUpload)
+router.post('/uploadAporte',  upload.single("file"), verifyActiveAdmin, AportesController.bulkUploadAportes)
 
 router.get('/', verifyActiveAdmin, AportesController.getAll)
 router.get('/afiliado/:id', verifyActiveUserOrAdmin, AportesController.getByAfiliado)

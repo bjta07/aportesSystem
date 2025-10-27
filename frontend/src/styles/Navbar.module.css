@@ -24,6 +24,48 @@
     gap: 10px;
 }
 
+.submenuSection {
+  margin-top: 10px;
+}
+
+.submenuHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.submenuHeader:hover {
+  opacity: 0.8;
+}
+
+.submenu {
+  margin-left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.submenu li {
+  list-style: none;
+}
+
+.submenu li a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: #ddd;
+  transition: 0.2s;
+}
+
+.submenu li a:hover {
+  color: #fff;
+  transform: translateX(3px);
+}
+
 .adminLinks p,
 .settings p {
     font-size: 0.85rem;

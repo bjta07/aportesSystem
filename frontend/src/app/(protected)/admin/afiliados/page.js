@@ -8,6 +8,7 @@ import Icon from "@/components/UI/Icons"
 import styles from '@/styles/MemberPage.module.css'
 import DetalleAfiliadoModal from "./componentes/DetalleAfiliadoModal"
 import BulkUploadModal from "./componentes/SubirSVModal"
+import SubirAportes from "./componentes/SubirAporteModal"
 
 export default function MemberList(){
     const [members, setMembers] = useState([])
@@ -16,6 +17,7 @@ export default function MemberList(){
     const [selectedMember, setSelectedMember] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isUploadFilesModalOpen, setIsUploadFilesModalOpen] = useState(false)
+    const [isUploadAportesModalOpen, setIsUploadAportesModalOpen] = useState(false)
     const [searchFilters, setSearchFilters] = useState({
         ci:'',
         id_colegio:''
@@ -143,6 +145,14 @@ export default function MemberList(){
         setIsUploadFilesModalOpen(true)
     }
 
+    const handleOpenAportesUpload = () => {
+        setIsUploadAportesModalOpen(true)
+    }
+
+    const handleCloseAportesUpload = () => {
+        setIsUploadAportesModalOpen (false)
+    }
+
     useEffect(() => {
         const fetchMembers = async () => {
             setLoading(true)
@@ -229,6 +239,9 @@ export default function MemberList(){
                     </button>
 
                     <button className={styles.uploadButton} onClick={handleOpenFilesUpload}>Cargar afiliados desde archivo</button>
+                    
+                    <button className={styles.uploadButton} onClick={handleOpenAportesUpload}>Cargar aportes desde archivo</button>
+
                 </div>
                 <div className={styles.resultsInfo}>
                     <p>Mostrando {filteredAndSortedMembers.length} de {members.length} afiliados</p>
@@ -297,6 +310,11 @@ export default function MemberList(){
             <BulkUploadModal
                 isOpen={isUploadFilesModalOpen}
                 onClose={handleCloseUploadModal}
+            />
+
+            <SubirAportes
+                isOpen={isUploadAportesModalOpen}
+                onClose={handleCloseAportesUpload}
             />
         </div>
     )

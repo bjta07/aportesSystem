@@ -104,16 +104,25 @@ export default function DatosPersonalesTab({
             </div>
 
             <div className={styles.inputContainer}>
-                <label className={styles.label}>
-                    Fecha de Afiliación:
-                    <input
-                        type="date"
-                        name="fecha_afiliacion"
-                        value={formData.fecha_afiliacion}
-                        onChange={handleChange}
-                        className={styles.input}
-                    />
-                </label>
+            <label className={styles.label}>
+                Fecha de Afiliación:
+            <input
+                type="text"
+                name="fecha_afiliacion"
+                value={
+                formData.fecha_afiliacion
+                    ? new Date(formData.fecha_afiliacion).toLocaleDateString('es-BO', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    })
+                    : ''
+                }
+                className={styles.input}
+                disabled
+            />
+            </label>
+
                 <label className={styles.label}>
                     Colegio:
                     <select

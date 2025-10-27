@@ -145,6 +145,33 @@ export default function UserReportPage(){
         })
     }
 
+    const buildTableRows = (memberList) => {
+        const rows = []
+        for (const member of memberList) {
+            const aporteList = aportes[String(member.id_afiliado)] || []
+            const mesesVals = Array(12).fill(0)
+            let total = 0
+            for (const a of aporteList) {
+                const m = Number(a.mes)
+                const monto = Number(a.monto) || 0
+                if (!isNaN(m) && m >=1 && m<=12) {
+                    mesesVals[m-1] += monto
+                    total += monto
+                } else{
+                    total += monto
+                }
+            }
+            const row = [
+                member.ci || '',
+                `${member.apellidos || ""} ${member.nombres || ""}`.trim(),
+                ...mesesVals.map(v => v === 0 ? "-" : Number(v).toFixed(1)),
+                Number(total).toFixed(1)
+            ]
+            rows.push(row)
+        }
+        return rows
+    }
+
 const generateAfiliadosPDF = async (members, currentUser) => {
   try {
     if (!members?.length) {

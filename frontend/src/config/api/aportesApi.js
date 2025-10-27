@@ -1,4 +1,5 @@
 import { fetchApi } from "./apiClient";
+import { fetchApiUpload } from "./apiClient";
 
 export const aporteApi = {
     createAporte: async (aporteData) => {
@@ -10,6 +11,10 @@ export const aporteApi = {
             method: 'POST',
             body: JSON.stringify(aporteData)
         })
+    },
+
+    uploadAporte: async (aporteData) => {
+        return fetchApiUpload('aportes/uploadAporte', aporteData)
     },
 
     updateAporte: (aporteId, aporteData) => fetchApi(`aportes/${aporteId}`, {
