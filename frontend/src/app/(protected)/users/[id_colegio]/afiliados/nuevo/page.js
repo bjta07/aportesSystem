@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useParams } from "next/navigation"
 import { toast } from "sonner"
 import memberApi from "@/config/api/afiliadoApi"
+import { colegioApi } from "@/config/api/colegioApi"
 import { useAuth } from "@/config/contexts/AuthContext"
 import Icon from "@/components/UI/Icons"
 import { ProtectedRoute } from "@/components/UI/ProtectedRoute"
@@ -10,6 +12,11 @@ import styles from '@/styles/CreateMembers.module.css'
 
 export default function RegistrarAfiliado(){
     const { user } = useAuth()
+    const params = useParams()
+    const id_colegio_actual = params?.id_colegio || user?.id_colegio
+    const [loading, setLoading] = useState(false)
+    const [message, setMessage] = useState("")
+    const [colegiosDisponibles, setColegiosDisponibles] = useState([])
 
     const [formData, setFormData] = useState({
         matricula_profesional: "",
@@ -23,8 +30,29 @@ export default function RegistrarAfiliado(){
         email: "",
         celular: ""
     })
-    const [loading, setLoading] = useState(false)
-    const [message, setMessage] = useState("")
+
+    useEffect(() => {
+        const fetchColegios = async () => {
+            try {
+                const response = await colegioApi.getSubColegios(user.id_colegio)
+                const data = Array.isArray(response) ? response : Array.isArray(response?.data) ? response.data : []
+                if (data.length > 0) {
+                    setColegiosDisponibles([
+                        { id_colegio: user.id_colegio, nombre: user.nombre_colegio},
+                        ...data
+                    ])
+                }else {
+                    setColegiosDisponibles([
+                        { id_colegio: user.id_colegio, nombre: user.nombre_colegio}
+                    ])
+                }
+            } catch (error) {
+                console.error('Error al obtener colegios: ', error)
+                setColegiosDisponibles([{id_colegio: user.id_colegio, nombre: user.nombre_colegio}])
+            }
+        }
+        if (user?.id_colegio) fetchColegios()
+    }, [user])
 
     const handleChange = (e) => {
         const { id, value} = e.target
@@ -186,23 +214,43 @@ export default function RegistrarAfiliado(){
                             onChange={handleChange}
                             style={{width: "120px", height:"44px"}}
                         />
-                        <label>Colegio</label>
-                        <div className={styles.date} style={{ 
-                            backgroundColor: '#f5f5f5', 
-                            cursor: 'default' 
-                        }}>
-                            {user.nombre_colegio || 'Sin colegio asignado'}
+                    <label>Colegio</label>
+                    {Array.isArray(colegiosDisponibles) && colegiosDisponibles.length > 1 ? (
+                        <select
+                            id="id_colegio"
+                            className={styles.date}
+                            value={formData.id_colegio}
+                            onChange={handleChange}
+                            required
+                        >
+                            {colegiosDisponibles.map((colegio) => (
+                                <option key={colegio.id_colegio} value={colegio.id_colegio}>
+                                    {colegio.nombre}
+                                </option>
+                            ))}
+                        </select>
+                    ) : (
+                    <>
+                        <div
+                            className={styles.date}
+                            style={{
+                                backgroundColor: "#f5f5f5",
+                                cursor: "default",
+                            }}
+                        >
+                            {user.nombre_colegio || "Sin colegio asignado"}
                         </div>
-                        
+
                         {/* Mantener el ID oculto para el formulario */}
-                        <input 
+                        <input
                             type="hidden"
                             id="id_colegio"
                             name="id_colegio"
                             value={formData.id_colegio}
                             onChange={handleChange}
                         />
-                        
+                    </>
+                )}
                     </div>
                     <button className={styles.submitBtn} type="submit" disabled={loading}>
                         <Icon name="save" fill/>

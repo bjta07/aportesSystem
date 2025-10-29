@@ -28,7 +28,6 @@ export default function Navbar({ collapsed }) {
         { href: `${basePath}/`, label: 'Dashboard', icon: 'user' },
         { href: `${basePath}/${user.id_colegio}/afiliados/nuevo`, label: 'Registrar Afiliado', icon: 'addUser' },
         { href: `${basePath}/${user.id_colegio}/afiliados`, label: 'Afiliados', icon: 'users' },
-        { href: `${basePath}/${user.id_colegio}/aportes`, label: 'Aportes', icon: 'editCash' },
         { href: `${basePath}/${user.id_colegio}/reports`, label: 'Informes', icon: 'report' }
     ];
 
@@ -84,17 +83,12 @@ export default function Navbar({ collapsed }) {
                                         <ul className={styles.submenu}>
                                             <li>
                                                 <Link href={`${basePath}/${sub.id_colegio}/afiliados`}>
-                                                    <Icon name='users' /> Afiliados
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link href={`${basePath}/${sub.id_colegio}/aportes`}>
-                                                    <Icon name='editCash' /> Aportes
+                                                    <Icon name='users' fill /> Afiliados
                                                 </Link>
                                             </li>
                                             <li>
                                                 <Link href={`${basePath}/${sub.id_colegio}/reports`}>
-                                                    <Icon name='report' /> Informes
+                                                    <Icon name='report' fill/> Informes
                                                 </Link>
                                             </li>
                                         </ul>

@@ -1,7 +1,6 @@
 import bcryptjs from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { UserModel } from '../models/user.model.js'
-import { AporteModel } from '../models/aportes.model.js'
 
 //registrar usuario
 const registrarUsuario = async (req, res) => {
@@ -12,11 +11,11 @@ const registrarUsuario = async (req, res) => {
         }
         const exisitingUsername = await UserModel.findOneByUsuario(usuario)
         if (exisitingUsername) {
-            return res.status(409).json({ ok: false, msg: 'User already exists'})
+            return res.status(409).json({ ok: false, error: 'User already exists'})
         }
 
         if (rol === 'user' && !id_colegio) {
-            return res.status(400).json({ ok: false, msg: 'id_colegio es obligatorio para usuarios de tipo user' })
+            return res.status(400).json({ ok: false, error: 'id_colegio es obligatorio para usuarios de tipo user' })
         }
 
         const salt = await bcryptjs.genSalt(10)
@@ -99,7 +98,7 @@ const login = async (req, res) => {
         })
     } catch (error) {
         console.error(error)
-        return res.status(500).json({ okf: false, msg: 'Server error'})
+        return res.status(500).json({ okf: false, error: 'Server error'})
     }
 }
 
@@ -107,14 +106,14 @@ const login = async (req, res) => {
 const profile = async (req, res) => {
     try {
         const user = await UserModel.findOneByUsuario(req.username)
-        if (!user) return res.status(404).json({ ok: false, msg: 'User not found'})
+        if (!user) return res.status(404).json({ ok: false, error: 'User not found'})
         return res.json({
             ok: true,
             data: user
     })
     } catch (error) {
         console.error(error)
-        return res.status(500).json({ ok:false, msg: 'Server error'})
+        return res.status(500).json({ ok:false, error: 'Server error'})
     }
 }
 
@@ -125,15 +124,15 @@ const updateRol = async (req, res) => {
         const { rol } = req.body
 
         if (!rol) {
-            return res.status(400).json({ ok: false, msg: 'Rol is required'})
+            return res.status(400).json({ ok: false, error: 'Rol is required'})
         }
 
         if (req.id_usuario === parseInt(id_usuario)) {
-            return res.status(400).json({ ok: false, msg: 'You cannot change your own rol'})
+            return res.status(400).json({ ok: false, error: 'You cannot change your own rol'})
         }
 
         const user = await UserModel.findOneById(id_usuario)
-        if (!user) return res.status(404).json({ ok: false, msg: 'User not found'})
+        if (!user) return res.status(404).json({ ok: false, error: 'User not found'})
         
         const updateUser = await UserModel.updateRol(id_usuario, rol)
 
@@ -144,7 +143,7 @@ const updateRol = async (req, res) => {
         })
     } catch (error) {
         console.error(error)
-        return res.status(500).json({ ok:false, msg: 'Server error'})
+        return res.status(500).json({ ok:false, error: 'Server error'})
     }
 }
 
@@ -154,7 +153,7 @@ const updateUser = async (req, res) => {
         const { nombre, usuario, password, email, rol, id_colegio, apellidos } = req.body
 
         const user = await UserModel.findOneById( id_usuario)
-        if (!user) return res.status(404).json({ok: false, msg: 'User not found'})
+        if (!user) return res.status(404).json({ok: false, error: 'User not found'})
         const updateUser = await UserModel.updateUsuario( id_usuario ,{ nombre, usuario, password, email, rol, id_colegio, apellidos})
         return res.json({
             ok: true,
@@ -163,7 +162,7 @@ const updateUser = async (req, res) => {
         })
     } catch (error) {
         console.error(error)
-        return res.status(500).json({ok: false, msg: 'Server error'})
+        return res.status(500).json({ok: false, error: 'Server error'})
     }
 }
 
@@ -175,14 +174,14 @@ const deleteUsuario = async (req, res) => {
 
         if (req.id_usuario === parseInt(id_usuario)) {
             console.log('[deleteUsuario] attempt to delete self blocked for id:', req.id_usuario)
-            return res.status(403).json({ ok: false, msg: 'You cannot delete yourself'})
+            return res.status(403).json({ ok: false, error: 'You cannot delete yourself'})
         }
 
         const user = await UserModel.findOneById(id_usuario)
         console.log('[deleteUsuario] user found:', user)
         if (!user) {
             console.log('[deleteUsuario] user not found for id:', id_usuario)
-            return res.status(404).json({ ok: false, msg: 'User not found'})
+            return res.status(404).json({ ok: false, error: 'User not found'})
         }
         
         const deleteUser = await UserModel.deleteUsuario(id_usuario)
@@ -198,7 +197,7 @@ const deleteUsuario = async (req, res) => {
         return res.json(responseBody)
     } catch (error) {
         console.error(error)
-        return res.status(500).json({ ok:false, msg: 'Server error'})
+        return res.status(500).json({ ok:false, error: 'Server error'})
     }
 }
 
@@ -208,7 +207,7 @@ const findAll = async (req, res) => {
         return res.json({ ok: true, data: users, msg: 'User retrieved successfully'})
     } catch (error) {
         console.error(error)
-        return res.status(500).json({ ok: false, msg: 'Server error'})
+        return res.status(500).json({ ok: false, error: 'Server error'})
     }
 }
 
@@ -220,12 +219,12 @@ const updatePersonalProfile = async (req, res) => {
         if (req.id_usuario !== parseInt(id_usuario)) {
             return res.status(403).json({
                 ok: false,
-                msg: 'No tienes permiso para actualizar ese perfil'
+                error: 'No tienes permiso para actualizar ese perfil'
             })
         }
         const user = await UserModel.findOneById(id_usuario)
         if (!user) {
-            return res.status(404).json({ok:false, msg: 'Usuario no encontrado'})
+            return res.status(404).json({ok:false, error: 'Usuario no encontrado'})
         }
 
         const updateUser = await UserModel.updateProfile(id_usuario, {
@@ -240,7 +239,7 @@ const updatePersonalProfile = async (req, res) => {
             msg: 'Perfil actualizado correctamente'
         })
     } catch (error) {
-        return res.status(500).json({ ok: false, msg: 'Error al actualizar el perfil'})
+        return res.status(500).json({ ok: false, error: 'Error al actualizar el perfil'})
     }
 }
 
@@ -252,18 +251,18 @@ const updatePassword = async (req, res) => {
         if (req.id_usuario !== parseInt(id_usuario)) {
             return res.status(403).json({
                 ok: false,
-                msg: 'No tienes permiso para cambiar esta contraseña'
+                error: 'No tienes permiso para cambiar esta contraseña'
             })
         }
 
         const user = await UserModel.findOneById(id_usuario)
         if (!user) {
-            return res.status(404).json({ ok: false, msg: 'Usuario no encontrado'})
+            return res.status(404).json({ ok: false, error: 'Usuario no encontrado'})
         }
 
         const isMatch = await bcryptjs.compare(currentPassword, user.password)
         if (!isMatch) {
-            return res.status(401).json({ ok: false, msg: 'La contraseña actual no es correcta'})
+            return res.status(401).json({ ok: false, error: 'La contraseña actual no es correcta'})
         }
 
         const salt = await bcryptjs.genSalt(10)
@@ -280,7 +279,7 @@ const updatePassword = async (req, res) => {
             msg: 'Contraseña actualizada correctamente'
         })
     } catch (error) {
-        return res.status(500).json({ ok: false, msg: 'Error al actualizar la contraseña'})
+        return res.status(500).json({ ok: false, error: 'Error al actualizar la contraseña'})
     }
 }
 

@@ -1,153 +1,306 @@
 .navContainer {
-    width: 250px;
-    height: 100vh;
-    background: linear-gradient(180deg,#1A2A3A, #02488f);
-    box-shadow: 2px 0 8px rgba(0,0,0,0.25);
-    display: flex;
-    flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(180deg, #111827 0%, #0F1923 100%);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 0;
+}
+
+.navContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.navContainer::-webkit-scrollbar-track {
+  background: rgba(26, 42, 58, 0.3);
+}
+
+.navContainer::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.4);
+  border-radius: 3px;
+}
+
+.navContainer::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.6);
 }
 
 .nav {
-    display: flex;
-    flex-direction: column;
-    padding: 25px 20px;
-    gap: 35px;
-    color: #f5f5f5;
-    height: 100%;
-    font-family: "Segoe UI", sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  padding: 0 12px;
 }
 
-.adminLinks,
-.settings {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.nav section > p {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(148, 163, 184, 0.7);
+  margin-bottom: 12px;
+  padding: 0 16px;
+  transition: opacity 0.3s ease;
 }
 
-.submenuSection {
-  margin-top: 10px;
+.collapsed section > p {
+  opacity: 0;
+  height: 0;
+  margin: 0;
+  overflow: hidden;
 }
+
+.linkContainer {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.linkItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #94A3B8;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: rgba(26, 42, 58, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  /* allow submenu to wrap below the header instead of sitting to the right */
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+
+.linkItem:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #3B82F6;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.linkItem:active {
+  transform: translateX(2px) scale(0.98);
+}
+
+.collapsed .linkItem {
+  justify-content: center;
+  padding: 12px;
+}
+.linkItem a {
+  color: inherit;
+  text-decoration: none;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.linkItem a span {
+  flex: 1;
+}
+
+/* Submenú Header */
 
 .submenuHeader {
   display: flex;
   align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: 0.2s;
+  gap: 12px;
+  flex: 1;
+  position: relative;
+  width: 100%;
 }
 
-.submenuHeader:hover {
-  opacity: 0.8;
+.submenuHeader::after {
+  content: '›';
+  position: absolute;
+  right: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: rgba(148, 163, 184, 0.5);
 }
+
+.submenuHeaderOpen::after {
+  transform: rotate(90deg);
+}
+
+.collapsed .submenuHeader::after {
+  display: none;
+}
+
+.submenuHeader span {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Submenú Expansivo */
 
 .submenu {
-  margin-left: 24px;
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  width: 100%;
+  /* Make submenu visible by default when it exists in the DOM.
+     The component renders the submenu only when it's open, so keeping
+     it visible here avoids the opacity/max-height mismatch that hid
+     it while still allowing a smooth entrance. */
+  max-height: 500px;
+  opacity: 1;
+  transition: opacity 0.18s ease, max-height 0.25s ease;
+  /* create a stacking context so ::before decoration stays behind submenu */
+  z-index: 1;
+}
+.linkItem > .submenu {
+  flex-basis: 100%;
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* keep .visible for backwards compatibility, but it's no longer required */
+.visible {
+  opacity: 1;
+  max-height: 500px;
+  margin-top: 12px;
 }
 
 .submenu li {
-  list-style: none;
+  padding-left: 32px;
 }
 
 .submenu li a {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.9rem;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #94A3B8;
   text-decoration: none;
-  color: #ddd;
-  transition: 0.2s;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  background: rgba(15, 25, 35, 0.5);
+  border: 1px solid rgba(59, 130, 246, 0.05);
+  /* bring links above decorative pseudo-element */
+  position: relative;
+  z-index: 3;
 }
 
 .submenu li a:hover {
-  color: #fff;
-  transform: translateX(3px);
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.2);
+  color: #60A5FA;
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
 }
 
-.adminLinks p,
-.settings p {
-    font-size: 0.85rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: #a8b5d1;
-    margin-bottom: 8px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+/* Secciones específicas */
+.adminLinks,
+.submenuSection,
+.settings {
+  /* ensure submenu is above decoration and other siblings */
+  position: relative;
+  z-index: 2;
+  position: relative;
 }
 
-.linkContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+.settings {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid rgba(59, 130, 246, 0.2);
 }
 
-.linkContainer li{
-    display: flex;
-    gap: 5px;
-    align-items: center;
+/* Efecto de glassmorphism en hover */
+.linkItem::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(147, 51, 234, 0.2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  /* standard property for broader compatibility */
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  /* keep the decoration behind the content */
+  z-index: 0;
 }
 
-.linkItem {
-    list-style: none;
+.linkItem:hover::before {
+  opacity: 1;
+}
+
+/* Estado colapsado */
+.collapsed .linkItem a,
+.collapsed .submenuHeader span {
+  display: none;
+}
+
+.collapsed .linkItem {
+  position: relative;
+  overflow: visible;
+}
+
+/* Tooltip para estado colapsado */
+.collapsed .linkItem:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(26, 42, 58, 0.95);
+  backdrop-filter: blur(10px);
+  color: #E2E8F0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  z-index: 1000;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navContainer {
+    padding: 15px 0;
+  }
+
+  .nav {
+    gap: 20px;
+    padding: 0 8px;
+  }
+
+  .linkItem {
     padding: 10px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: #ffffffcc;
-    font-size: 0.95rem;
-}
-
-.linkItem:hover {
-    background-color: rgba(255,255,255,0.1);
-    color: #fff;
-    transform: translateX(4px);
-}
-
-.main {
-  display: grid;
-  grid-template-columns: 250px 1fr;
-  grid-template-rows: 73px 1fr;
-  transition: grid-template-columns 0.3s ease;
-  height: 100vh;
-}
-
-.header {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  padding: 0 15px;
-  background: #f5f5f5;
-  border-bottom: 1px solid #ddd;
-}
-
-.sidebar {
-  grid-column: 1 / 2;
-  grid-row: 2 / 3;
-  height: 100%;
-  transition: width 0.3s ease;
-  overflow: hidden;
-}
-
-.content {
-  grid-column: 2 / 3;
-  grid-row: 2 / 3;
-  padding: 20px;
-  overflow-y: auto;
-}
-
-.toggleBtn {
-  margin-right: 15px;
-  background: none;
-  border: none;
-  font-size: 1.3rem;
-  cursor: pointer;
-  color: #02488f;
-  transition: transform 0.2s ease;
-}
-
-.toggleBtn:hover {
-  transform: scale(1.1);
+  }
 }

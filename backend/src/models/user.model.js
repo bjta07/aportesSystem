@@ -68,7 +68,6 @@ const findOneById = async (id_usuario) => {
 }
 
 //Obtener a todos los usuarios
-// Obtener a todos los usuarios, reemplazando id_colegio por nombre_colegio
 const findAll = async () => {
     const query = {
         text: `
@@ -77,7 +76,6 @@ const findAll = async () => {
                 u.nombre, 
                 u.usuario, 
                 u.email, 
-                u.password, 
                 u.rol, 
                 u.apellidos,
                 c.nombre AS nombre_colegio

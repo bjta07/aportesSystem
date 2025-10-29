@@ -1,0 +1,33 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    color: #fff;
+}
+/* Contenedor del título para controlar alineación vertical */
+.titleContainer {
+    flex: 1;
+    text-align: center;
+}
+
+/* Estilo del título principal */
+.title {
+    font-size: 1.4rem;
+    line-height: 1.4;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+    color: #f5f5f5;
+}
+
+/* Imagen del logo */
+.logo {
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}

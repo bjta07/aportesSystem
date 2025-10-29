@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { UserModel } from '../models/user.model.js'
+import { ColegioModel } from '../models/colegio.model.js'
 
 
 //Verificar token
@@ -169,56 +170,66 @@ export const verifyActiveUser = async (req, res, next) => {
 
 export const restrictToColegio = async (req, res, next) => {
   try {
-    const { user, uid } = req
+    const { user, uid } = req;
 
-    // Si no hay usuario, error inmediato
     if (!user && !uid) {
-      return res.status(401).json({ ok: false, error: 'Usuario no autenticado' })
+      return res.status(401).json({ ok: false, error: 'Usuario no autenticado' });
     }
 
-    // Asegurar que tenemos user desde DB o el request
-    const dbUser = user || (await UserModel.findOneById(uid))
+    const dbUser = user || (await UserModel.findOneById(uid));
     if (!dbUser) {
-      return res.status(404).json({ ok: false, error: 'Usuario no encontrado en BD' })
+      return res.status(404).json({ ok: false, error: 'Usuario no encontrado en BD' });
     }
-    
-    // Si el usuario es admin, lo dejamos pasar
+
+    // ✅ Admins pasan directo
     if (dbUser.rol === 'admin' || dbUser.rol === 'superadmin') {
-      return next()
+      return next();
     }
 
-    // Asegurar que el usuario tiene id_colegio
     if (!dbUser.id_colegio) {
-      return res.status(403).json({ ok: false, error: 'El usuario no pertenece a ningún colegio' })
+      return res.status(403).json({ ok: false, error: 'El usuario no pertenece a ningún colegio' });
     }
 
-    const userColegio = String(dbUser.id_colegio)
-    const targetColegio =
-      String(req.body?.id_colegio ?? req.query?.id_colegio ?? req.params?.id_colegio ?? '')
+    const userColegio = String(dbUser.id_colegio);
+    const targetColegio = String(
+      req.body?.id_colegio ??
+      req.query?.id_colegio ??
+      req.params?.id_colegio ??
+      ''
+    );
 
-
-    // ✅ Si la ruta contiene id_colegio, verificar coincidencia
-    if (targetColegio && targetColegio !== userColegio) {
-
-      return res.status(403).json({
-        ok: false,
-        error: 'No tienes permiso para acceder a este colegio'
-      })
+    // Si no se especifica colegio, dejar pasar
+    if (!targetColegio) {
+      req.id_colegio = dbUser.id_colegio;
+      return next();
     }
 
-    // ✅ Adjuntar el id_colegio del usuario al request para futuras queries
-    req.id_colegio = dbUser.id_colegio
+    // Si el colegio del target es distinto al del usuario...
+    if (targetColegio !== userColegio) {
+      const subColegios = await ColegioModel.getSubColegios(userColegio);
+      const idsSubColegios = subColegios.map(c => String(c.id_colegio));
 
-    // ✅ Todo OK
-    return next()
+      // ✅ Si el target está dentro de los subcolegios, PERMITIR acceso
+      if (!idsSubColegios.includes(targetColegio)) {
+        return res.status(403).json({
+          ok: false,
+          error: 'No tienes permiso para acceder a este colegio'
+        });
+      }
+    }
+
+    // ✅ Adjuntar el id_colegio al request
+    req.id_colegio = dbUser.id_colegio;
+    return next();
   } catch (error) {
     return res.status(500).json({
       ok: false,
       error: 'Error interno en restrictToColegio',
       details: error.message
-    })
+    });
   }
-}
+};
+
 
 
 export const verifyActiveToken = [verifyToken]

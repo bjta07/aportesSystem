@@ -1,46 +1,33 @@
 'use client'
 
 import { useState, useEffect, useMemo } from "react"
+import { useParams } from "next/navigation"
 import { useAuth } from "@/config/contexts/AuthContext"
 import memberApi from "@/config/api/afiliadoApi"
 import { aporteApi } from "@/config/api/aportesApi"
+import { colegioApi } from "@/config/api/colegioApi"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
 import styles from '@/styles/Reports.module.css'
 
 export default function UserReportPage(){
+    const { user: currentUser } = useAuth()
+    const params = useParams()
+    const id_colegio_actual = params?.id_colegio || currentUser?.id_colegio
+
     const [members, setMembers] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
-
     const [aportes, setAportes] = useState({})
     const [searchFilters, setSearchFilters] = useState({ ci: ""})
     const [selectedYear, setSelectedYear] = useState("")
     const [availableYears, setAvailableYears] = useState([])
-    const { user: currentUser } = useAuth()
+    const [nombreColegio, setNombreColegio] = useState("Cargando colegio...")
 
     const meses = [
         "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
         "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
     ]
-
-        const colegios = {
-        "1": "Colegio departamental de La Paz",
-        "2": "Colegio departamental de Oruro",
-        "3": "Colegio departamental de Cochabamba",
-        "4": "Colegio departamental de Santa Cruz",
-        "5": "Colegio departamental de Tarija",
-        "6": "Colegio departamental de Potosi",
-        "7": "Colegio departamental de Beni",
-        "8": "Colegio departamental de Pando",
-        "9": "Colegio departamental de Chuquisaca",
-        "10": "Colegio regional de El Alto",
-        "11": "Colegio regional de Camiri",
-        "12": "Colegio regional de Tupiza",
-        "13": "Colegio regional de Catavi",
-        "14": "Colegio regional de Riberalta",
-        "15": "Colegio regional de Yacuiba"
-    }
 
     const handleSearchChange = (field, value) => {
         setSearchFilters(prev => ({
@@ -55,6 +42,28 @@ export default function UserReportPage(){
             especialidad: ''
         })
     }
+
+    useEffect(() => {
+    const fetchColegioNombre = async () => {
+        try {
+            const data = await colegioApi.getColegioById(id_colegio_actual)
+            console.log("📦 Colegio recibido:", data)
+    
+            if (data && data.nombre) {
+                setNombreColegio(data.nombre)
+            } else {
+                setNombreColegio("Colegio desconocido")
+            }
+        } catch (error) {
+            console.error("Error al obtener nombre del colegio:", error)
+            setNombreColegio("Colegio no encontrado")
+        }
+    }
+    
+    if (id_colegio_actual) {
+        fetchColegioNombre()
+    }
+    }, [id_colegio_actual])
 
     const filteredAndSortedMembers = useMemo(() => {
     if (!Array.isArray(members)) return []
@@ -76,11 +85,11 @@ export default function UserReportPage(){
     const fetchMembers = async () => {
         setLoading(true)
         try {
-            const response = await memberApi.getByCity(currentUser.id_colegio)
-
+            const response = await memberApi.getByCity(id_colegio_actual)
+    
             if (response?.ok && Array.isArray(response.data)) {
                 // Filtramos miembros del mismo colegio (por seguridad)
-                const filtered = response.data.filter(m => m.id_colegio === currentUser.id_colegio)
+                const filtered = response.data.filter(m => String(m.id_colegio) === String(id_colegio_actual))
                 setMembers(filtered)
             } else {
                 setError('No se encontraron afiliados para este colegio')
@@ -91,11 +100,11 @@ export default function UserReportPage(){
             setLoading(false)
         }
     }
-
-    if (currentUser?.id_colegio) {
+    
+    if (id_colegio_actual) {
         fetchMembers()
     }
-}, [currentUser?.id_colegio])
+    }, [id_colegio_actual])
 
     useEffect(() => {
         const fetchYears = async () => {
@@ -186,7 +195,7 @@ const generateAfiliadosPDF = async (members, currentUser) => {
     doc.text("LISTADO DE AFILIADOS", 14, 15);
 
     doc.setFontSize(11);
-    doc.text(`Colegio: ${currentUser?.nombre_colegio || 'Sin definir'}`, 14, 23);
+    doc.text(`Colegio: ${nombreColegio}`, 14, 23)
     doc.text(`Generado por: ${currentUser?.nombre || ''}`, 14, 30);
     doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 37);
 
@@ -292,7 +301,7 @@ const generateAfiliadosPDF = async (members, currentUser) => {
         }
 
         const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4'})
-        const title = `Informe de aportes del - Año ${selectedYear}`
+        const title = `Informe de aportes del ${nombreColegio} - Año ${selectedYear}`
         const printedBy = currentUser ? `${currentUser.nombre}` : 'usuario desconocido'
         const fechaImpresion = formatDateTime(new Date())
 
@@ -313,13 +322,10 @@ const generateAfiliadosPDF = async (members, currentUser) => {
                     'Total'
                 ]
         
-                const groupedByColegio = {}
-                filteredAndSortedMembers.forEach(member => {
-                    const colegioName = colegios[member.id_colegio] || 'Colegio desconocido'
-                    if (!groupedByColegio[colegioName]) groupedByColegio[colegioName] = []
-                    groupedByColegio[colegioName].push(member)
-                })
-        
+                const groupedByColegio = {
+                    [nombreColegio]: filteredAndSortedMembers
+                }
+
                 let isFirstTable = true
         
                 for (const colegioName in groupedByColegio) {
@@ -392,6 +398,9 @@ const generateAfiliadosPDF = async (members, currentUser) => {
     return (
         <div className={styles.container}>
         <h2 className={styles.title}>Informes de Aportes</h2>
+        <p className={styles.subtitle}>
+            {nombreColegio}
+        </p>
 
         <div className={styles.filters}>
             <label className={styles.label}>

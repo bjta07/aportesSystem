@@ -38,12 +38,24 @@ const getColegioById = async (id_colegio) => {
 }
 
 const getSubColegios = async (id_colegio_padre) => {
-    const query = {
-        text: `SELECT * FROM colegio WHERE id_colegio_padre = $1`,
-        values: [id_colegio_padre]
+    try {
+        if (!id_colegio_padre) return []
+
+        const query = {
+            text: `
+                SELECT id_colegio, nombre, id_colegio_padre
+                FROM colegio 
+                WHERE id_colegio_padre = $1
+                ORDER BY nombre ASC
+                `,
+            values: [id_colegio_padre]
+        }
+        const { rows } = await db.query(query)
+        return rows || []
+    } catch (error) {
+        console.error('Error en getSubcolegios', error)
+        throw new Error('Error al obtener los subcolegios')
     }
-    const { rows } = await db.query(query)
-    return rows
 }
 
 export const ColegioModel = {

@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { useAuth } from "@/config/contexts/AuthContext"
 import memberApi from "@/config/api/afiliadoApi"
+import { colegioApi } from "@/config/api/colegioApi"
 import { aporteApi } from "@/config/api/aportesApi"
 import jsPDF from 'jspdf'
 import autoTable from "jspdf-autotable"
@@ -12,32 +13,18 @@ export default function Reports(){
     const [members, setMembers] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null);
-
     const [aportes, setAportes] = useState({})
     const [searchFilters, setSearchFilters] = useState({ ci: "", id_colegio: "", especialidad: ""})
     const [selectedYear, setSelectedYear] = useState("")
     const [availableYears, setAvailableYears] = useState([])
+    const [colegiosDisponibles, setColegiosDisponibles] = useState([])
+
     const { user: currentUser } = useAuth()
 
     const meses = [
         "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
         "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
     ]
-
-    const colegios = {
-        "1": "Colegio departamental de Santa Cruz",
-        "2": "Colegio departamental de La Paz",
-        "3": "Colegio departamental de Cochabamba",
-        "4": "Colegio departamental de Oruro",
-        "5": "Colegio departamental de Potosí",
-        "6": "Colegio departamental de Tarija",
-        "7": "Colegio departamental de Sucre",
-        "8": "Colegio departamental de Pando",
-        "9": "Colegio regional de El Alto",
-        "10": "Colegio regional de Tupiza",
-        "11": "Colegio regional de Camiri",
-        "12": "Colegio regional de Catavi"
-    }
 
     const handleSearchChange = (field, value) => {
         setSearchFilters(prev => ({
@@ -54,23 +41,29 @@ export default function Reports(){
         })
     }
 
-    const filteredAndSortedMembers = useMemo(() => {
-        if (!Array.isArray(members)) return []
-        let filtered = members.filter(member => member.ci)
-        if (searchFilters.ci.trim() !== ''){
-            filtered = filtered.filter(member => {
-                if (!member.ci) return false
-                return String(member.ci) === String(searchFilters.ci).trim()
-            })
+    useEffect(() => {
+        const fetchColegios = async () => {
+            try {
+                if (!currentUser) return
+                let data = []
+
+                if (!currentUser.id_colegio) {
+                    const response = await colegioApi.getAllColegios()
+                    data = response?.data || []
+                } else {
+                    const response = await colegioApi.getColegioById(currentUser.id_colegio)
+                    data = response?.data?.length ? response.data : [{
+                        id_colegio: currentUser.id_colegio,
+                        nombre: currentUser.nombre_colegio || "mi colegio"
+                    }]
+                }
+                setColegiosDisponibles(data)
+            } catch (error) {
+                console.error('Error al obtener colegios', error)
+            }
         }
-        if (searchFilters.id_colegio && searchFilters.id_colegio.trim() !== '') {
-            filtered = filtered.filter(member => {
-                if (!member.id_colegio) return false
-                return String(member.id_colegio) === String(searchFilters.id_colegio)
-            })
-        }
-        return filtered.sort((a,b) => (a.apellidos || '').localeCompare(b.apellidos || ''))
-    }, [members, searchFilters])
+        fetchColegios()
+    }, [currentUser])
 
     useEffect(() => {
         const fetchMembers = async () => {
@@ -132,6 +125,18 @@ export default function Reports(){
         if (members.length > 0) fetchAportesForYear()
     }, [members, selectedYear])
 
+    const filteredAndSortedMembers = useMemo(() => {
+        if (!Array.isArray(members)) return []
+        let filtered = members.filter(member => member.ci)
+        if (searchFilters.ci.trim() !== '') {
+            filtered = filtered.filter(m => String(m.ci) === searchFilters.ci.trim())
+        }
+        if (searchFilters.id_colegio.trim() !== '') {
+            filtered = filtered.filter(m => String(m.id_colegio) === searchFilters.id_colegio)
+        }
+        return filtered.sort((a,b) => (a.apellidos || '').localeCompare(b.apellidos || ''))
+    }, [members, searchFilters])
+
     const formatDateTime = (date = new Date()) => {
         return date.toLocaleString("es-BO", {
             year: 'numeric', month: 'long', day: '2-digit',
@@ -180,10 +185,10 @@ export default function Reports(){
     doc.text("LISTADO DE AFILIADOS POR COLEGIO", 14, 15);
 
     doc.setFontSize(11);
-    const colegioName =
-      searchFilters.id_colegio && colegios[searchFilters.id_colegio]
-        ? colegios[searchFilters.id_colegio]
-        : "Todos los colegios";
+    const colegioObj = colegiosDisponibles.find(
+        (c) => String(c.id_colegio) === String(searchFilters.id_colegio)
+    )
+    const colegioName = colegioObj ? colegioObj.nombre : 'Todos los colegios'
 
     doc.text(`Colegio: ${colegioName}`, 14, 23);
     doc.text(`Generado por: ${currentUser?.nombre || "Administrador"}`, 14, 30);
@@ -203,6 +208,10 @@ export default function Reports(){
           console.error(`Error al obtener especialidad de ${m.nombres}:`, error);
         }
 
+        const colegioItem = colegiosDisponibles.find(
+            (c) => String(c.id_colegio) === String(m.id_colegio)
+        )
+
         return {
           matricula_profesional: m.matricula_profesional || "",
           nro_registro_colegio: m.nro_registro_colegio || "",
@@ -213,8 +222,9 @@ export default function Reports(){
           especialidad,
           email: m.email || "",
           celular: m.celular || "",
-          nombre_colegio:
-            colegios[m.id_colegio] || m.nombre_colegio || "Desconocido",
+          nombre_colegio: colegioItem
+          ? colegioItem.nombre
+          : m.nombre_colegio || 'Desconocido'
         };
       })
     );
@@ -314,7 +324,11 @@ export default function Reports(){
 
         const groupedByColegio = {}
         filteredAndSortedMembers.forEach(member => {
-            const colegioName = colegios[member.id_colegio] || 'Colegio desconocido'
+            const colegioItem = colegiosDisponibles.find(
+                (c) => String(c.id_colegio) === String(member.id_colegio)
+            )
+            const colegioName = colegioItem ? colegioItem.nombre : 'Colegio Desconocido'
+
             if (!groupedByColegio[colegioName]) groupedByColegio[colegioName] = []
             groupedByColegio[colegioName].push(member)
         })
@@ -390,7 +404,7 @@ export default function Reports(){
 
     return (
         <div className={styles.container}>
-        <h2 className={styles.title}>Informes de Aportaciones</h2>
+        <h2 className={styles.title}>Informes de Aportes</h2>
 
         <div className={styles.filters}>
             <label className={styles.label}>
@@ -415,8 +429,10 @@ export default function Reports(){
                     className={styles.select}
                 >
                     <option value="">Todos</option>
-                    {Object.entries(colegios).map(([id, name]) => (
-                        <option key={id} value={id}>{name}</option>
+                    {colegiosDisponibles.map( c => (
+                        <option key={c.id_colegio} value={c.id_colegio}>
+                            {c.nombre}
+                        </option>
                     ))}
                 </select>
             </label>
@@ -467,11 +483,12 @@ export default function Reports(){
                         {filteredAndSortedMembers.map((m, idx) => {
                             const aporteList = aportes[String(m.id_afiliado)] || []
                             const total = aporteList.reduce((acc, a) => acc + (Number(a.monto) || 0), 0)
+                            const colegio = colegiosDisponibles.find( c=> c.id_colegio === m.id_colegio)
                             return (
                                 <tr key={m.id_afiliado} className={idx % 2 === 0 ? styles.rowEven : styles.rowOdd}>
                                     <td>{m.ci}</td>
                                     <td>{(m.apellidos || '') + ' ' + (m.nombres || '')}</td>
-                                    <td>{colegios[String(m.id_colegio)] || m.nombre_colegio || ''}</td>
+                                    <td>{colegio?.nombre || m.nombre_colegio || 'Desconocido'}</td>
                                     <td>{total.toFixed(2)}</td>
                                 </tr>
                             )
