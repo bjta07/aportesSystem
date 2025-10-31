@@ -46,7 +46,7 @@ const create = async (req, res) => {
         return res.status(201).json({ok: true, data: colegio})
     } catch (error) {
         console.error('Error en .create', error)
-        return res.status(500).json({ok:false, error: 'Error al crear colegio'})
+        return res.status(500).json({ ok:false, error: 'Error al crear colegio'})
     }
 }
 

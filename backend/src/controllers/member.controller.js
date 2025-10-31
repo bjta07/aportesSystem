@@ -18,13 +18,13 @@ const createMember = async (req, res) => {
         if (!matricula_profesional || !nro_registro_colegio || !nombres ||
     !apellidos || !ci || !fecha_afiliacion || !estado || !id_colegio || !email ||
     !celular) {
-            return res.status(400).json({ ok:false, message: "Faltan datos obligatorios" })
+            return res.status(400).json({ ok:false, error: "Faltan datos obligatorios" })
         }
         const existCi = await MemberModel.findByCi(ci)
         if (existCi) {
             return res.status(409).json({
                 ok: false,
-                msg: 'Ya existe este CI'
+                error: 'Ya existe este CI'
             })
         }
 
@@ -60,7 +60,7 @@ const createMember = async (req, res) => {
         console.error(error)
         return res.status(500).json({
             ok: false,
-            msg: 'Error de servidor'
+            error: 'Error de servidor'
         })
     }
 }
@@ -78,7 +78,7 @@ const findAll = async (req, res) => {
         console.error(error)
         return res.status(500).json({
             ok: false,
-            msg: 'Error de servidor'
+            error: 'Error de servidor'
         })
     }
 }
@@ -96,7 +96,7 @@ const findByCi = async (req, res) => {
         console.error(error)
         return res.status(500).json({
             ok: false,
-            msg: 'Error de servidor'
+            error: 'Error de servidor'
         })
     }
 }
@@ -114,7 +114,7 @@ const findByColegio = async (req, res) => {
         console.error(error)
         return res.status(500).json({
             ok: false,
-            msg: 'Error de servidor'
+            error: 'Error de servidor'
         })
     }
 }
@@ -134,11 +134,11 @@ const updateMember = async (req, res) => {
                 celular
             } = req.body
         
-        if (!id_afiliado) return res.status(400).json({ ok: false, msg: 'id_afiliado is required' })
+        if (!id_afiliado) return res.status(400).json({ ok: false, error: 'id_afiliado is required' })
         const member = await MemberModel.findById(id_afiliado)
         if (!member) return res.status(404).json({
             ok: false,
-            msg: 'Afiliado no encontrado'
+            error: 'Afiliado no encontrado'
         })
 
         const updateMember = await MemberModel.updateMemeber(id_afiliado,{
@@ -154,7 +154,7 @@ const updateMember = async (req, res) => {
         console.error(error)
         return res.status(500).json({
             ok: false,
-            msg: 'Error de servidor'
+            error: 'Error de servidor'
         })
     }
 }
@@ -165,7 +165,7 @@ const deleteMember = async (req, res) => {
         const member = await MemberModel.findById(id_afiliado)
         if (!member) return res.status(404).json({
             ok: false,
-            msg: 'Afiliado no encontrado'
+            error: 'Afiliado no encontrado'
         })
 
         const deleteMember = await MemberModel.deleteMember(id_afiliado)
@@ -179,7 +179,7 @@ const deleteMember = async (req, res) => {
         console.error(error)
         return res.status(500).json({
             ok: false,
-            msg: 'Error de servidor'
+            error: 'Error de servidor'
         })
     }
 }
@@ -190,7 +190,7 @@ const addEspecialidades = async (req, res) => {
         if (!id_afiliado || !id_especialidad || !universidad || !fecha_titulo) {
             return res.status(400).json({
                 ok: false,
-                msg: 'Faltan campos requeridos.'
+                error: 'Faltan campos requeridos.'
             })
         }
 
@@ -209,7 +209,7 @@ const addEspecialidades = async (req, res) => {
         console.error(error)
         return res.status(500).json({
             ok: false,
-            msg: 'Error de servidor'
+            error: 'Error de servidor'
         })
     }
 }
@@ -224,7 +224,7 @@ const getEspecialidadesByAfiliado = async (req, res) => {
             return res.json({
                 ok: true,
                 data: [],
-                msg: 'No se encontraron especialidades para este afiliado'
+                error: 'No se encontraron especialidades para este afiliado'
             })
         }
         return res.json({
@@ -236,7 +236,7 @@ const getEspecialidadesByAfiliado = async (req, res) => {
         console.error(error)
         return res.status(500).json({
             ok: false,
-            msg: 'Error de Servidor'
+            error: 'Error de Servidor'
         })
     }
 }
@@ -249,7 +249,7 @@ const deleteEspecialidad = async (req, res) => {
         if (!result) {
             return res.status(404).json({
                 ok: false,
-                msg: 'Especialidad no encontrada o ya eliminada'
+                error: 'Especialidad no encontrada o ya eliminada'
             })
         }
 
@@ -262,7 +262,7 @@ const deleteEspecialidad = async (req, res) => {
         console.error(error)
         return res.status(500).json({
             ok: false,
-            msg: 'Error de servidor'
+            error: 'Error de servidor'
         })
     }
 }
@@ -357,7 +357,6 @@ const bulkUpload = async (req, res) => {
     })
   }
 }
-
 
 export const MemberController = {
     createMember,

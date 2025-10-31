@@ -59,7 +59,7 @@ const registrarUsuario = async (req, res) => {
         })
     } catch (error) {
         console.log(error)
-        return res.status(500).json({ ok: false, msg: 'Server error'})
+        return res.status(500).json({ ok: false, error: 'Server error'})
     }
 }
 
@@ -98,7 +98,7 @@ const login = async (req, res) => {
         })
     } catch (error) {
         console.error(error)
-        return res.status(500).json({ okf: false, error: 'Server error'})
+        return res.status(500).json({ ok: false, error: 'Server error'})
     }
 }
 
@@ -170,31 +170,28 @@ const updateUser = async (req, res) => {
 const deleteUsuario = async (req, res) => {
     try {
         const { id_usuario } = req.params
-        console.log('[deleteUsuario] received id_usuario:', id_usuario)
-
+        
         if (req.id_usuario === parseInt(id_usuario)) {
             console.log('[deleteUsuario] attempt to delete self blocked for id:', req.id_usuario)
             return res.status(403).json({ ok: false, error: 'You cannot delete yourself'})
         }
 
         const user = await UserModel.findOneById(id_usuario)
-        console.log('[deleteUsuario] user found:', user)
+
         if (!user) {
             console.log('[deleteUsuario] user not found for id:', id_usuario)
             return res.status(404).json({ ok: false, error: 'User not found'})
         }
         
         const deleteUser = await UserModel.deleteUsuario(id_usuario)
-        console.log('[deleteUsuario] deleteUser result:', deleteUser)
 
         const responseBody = {
             ok: true,
             data: { id_usuario, nombre: deleteUser.nombre},
             msg: 'User deleted successfully'
         }
-        console.log('[deleteUsuario] responding with:', responseBody)
-
         return res.json(responseBody)
+        
     } catch (error) {
         console.error(error)
         return res.status(500).json({ ok:false, error: 'Server error'})

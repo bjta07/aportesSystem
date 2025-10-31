@@ -199,7 +199,7 @@ async getAllYears (req, res) {
     console.error('Error al obtener los años de aportes:', error)
     return res.status(500).json({
       ok: false,
-      msg: 'Error del servidor al obtener los años de aportes.'
+      error: 'Error del servidor al obtener los años de aportes.'
     })
   }
 },
@@ -229,7 +229,7 @@ async getByDepartamento(req, res) {
     if (!data || data.length === 0) {
       return res.status(404).json({
         ok: false,
-        msg: 'No se encontraron aportes agrupados por departamento.'
+        error: 'No se encontraron aportes agrupados por departamento.'
       });
     }
 
@@ -251,7 +251,7 @@ async getAportesByMes (req, res) {
         const { anio } = req.query
 
         if (!anio) {
-            return res.status(400).json({ ok: false, msg: 'Debe especificar un año'})
+            return res.status(400).json({ ok: false, error: 'Debe especificar un año'})
         }
         const data = await AporteModel.getAportesByMes(anio)
         return res.json({
@@ -262,7 +262,7 @@ async getAportesByMes (req, res) {
         console.error('Error en getAportes', error)
         return res.status(500).json({
             ok: false,
-            msg: 'Error al obtener los aportes por mes'
+            error: 'Error al obtener los aportes por mes'
         })
     }
 },
@@ -273,7 +273,7 @@ async getAportesByMesYColegio(req, res){
     if (!anio || !id_colegio) {
       return res.status(400).json({
         ok: false,
-        msg: 'Debe especificar un año'
+        error: 'Debe especificar un año'
       })
     }
 
@@ -286,7 +286,7 @@ async getAportesByMesYColegio(req, res){
     console.log(error)
     return res.status(500).json({
       ok: false,
-      msg: 'Error al obtener aportes por mes y colegio'
+      error: 'Error al obtener aportes por mes y colegio'
     })
   }
 },

@@ -4,17 +4,20 @@ import dotenv from 'dotenv'
 
 import userRouter from './routes/user.routes.js'
 import memberRouter from './routes/member.routes.js'
+import loggerMiddleware from './middlewares/loggerMiddleware.js'
 import aporteRouter from './routes/aporte.routes.js'
 import colegioRouter from './routes/colegio.routes.js'
+import { logger } from './logger.js'
 
 dotenv.config()
 
 const app = express()
 
 // Simple request logger to debug incoming requests (including OPTIONS preflight)
-app.use((req, res, next) => {
-    console.log('[backend] Incoming request:', req.method, req.originalUrl)
-    next()
+app.use(loggerMiddleware)
+app.get('/ping', (req, res) => {
+    req.log.info('Handler /ping ejecutado')
+    res.send('pong')
 })
 
 app.use (cors({
